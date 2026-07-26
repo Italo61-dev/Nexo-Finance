@@ -1,0 +1,21 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    if: ${{ !github.event.repository.private || (github.event.repository.security_and_analysis && github.event.repository.security_and_analysis.advanced_security && github.event.repository.security_and_analysis.dependency_graph && github.event.repository.security_and_analysis.advanced_security.status == 'enabled' && github.event.repository.security_and_analysis.dependency_graph.status == 'enabled') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
