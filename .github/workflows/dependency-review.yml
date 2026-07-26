@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   dependency-review:
+    if: ${{ !github.event.repository.private || (github.event.repository.security_and_analysis && github.event.repository.security_and_analysis.advanced_security && github.event.repository.security_and_analysis.dependency_graph && github.event.repository.security_and_analysis.advanced_security.status == 'enabled' && github.event.repository.security_and_analysis.dependency_graph.status == 'enabled') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
