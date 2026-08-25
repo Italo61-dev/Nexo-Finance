@@ -1,4 +1,4 @@
-package com.nexofinance.backend.model;
+package com.nexofinance.backend.domain.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

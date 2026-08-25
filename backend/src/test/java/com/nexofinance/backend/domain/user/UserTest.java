@@ -1,4 +1,4 @@
-package com.nexofinance.backend.model;
+package com.nexofinance.backend.domain.user;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,29 +10,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UserTest {
 
     @Test
-    @DisplayName("Should create user using Lombok builder and getters")
+    @DisplayName("Deve criar usuário utilizando Builder do Lombok e validar getters")
     void shouldCreateUserWithBuilder() {
         User user = User.builder()
-                .name("John Doe")
-                .email("john.doe@example.com")
+                .name("João Silva")
+                .email("joao.silva@example.com")
                 .passwordHash("secure_hash_123")
                 .build();
 
-        assertThat(user.getName()).isEqualTo("John Doe");
-        assertThat(user.getEmail()).isEqualTo("john.doe@example.com");
+        assertThat(user.getName()).isEqualTo("João Silva");
+        assertThat(user.getEmail()).isEqualTo("joao.silva@example.com");
         assertThat(user.getPasswordHash()).isEqualTo("secure_hash_123");
     }
 
     @Test
-    @DisplayName("Should validate Spring Security UserDetails contract")
+    @DisplayName("Deve validar a integração com o contrato UserDetails do Spring Security")
     void shouldValidateUserDetailsIntegration() {
         User user = User.builder()
-                .name("Jane Doe")
-                .email("jane.doe@example.com")
+                .name("Maria Souza")
+                .email("maria.souza@example.com")
                 .passwordHash("secret_hash")
                 .build();
 
-        assertThat(user.getUsername()).isEqualTo("jane.doe@example.com");
+        assertThat(user.getUsername()).isEqualTo("maria.souza@example.com");
         assertThat(user.getPassword()).isEqualTo("secret_hash");
         assertThat(user.getAuthorities()).hasSize(1);
         assertThat(user.getAuthorities().iterator().next().getAuthority()).isEqualTo("ROLE_USER");
@@ -43,7 +43,7 @@ class UserTest {
     }
 
     @Test
-    @DisplayName("Should populate timestamps on PrePersist and PreUpdate")
+    @DisplayName("Deve preencher os timestamps no PrePersist e PreUpdate")
     void shouldPopulateTimestampsOnPrePersistAndPreUpdate() {
         User user = new User();
         user.onCreate();
@@ -57,7 +57,7 @@ class UserTest {
     }
 
     @Test
-    @DisplayName("Should validate equals and hashCode based on ID")
+    @DisplayName("Deve validar equals e hashCode baseados no ID do usuário")
     void shouldValidateEqualsAndHashCode() {
         User u1 = User.builder().id(1L).name("User 1").email("u1@test.com").build();
         User u2 = User.builder().id(1L).name("User 2").email("u2@test.com").build();
