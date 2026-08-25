@@ -1,6 +1,5 @@
-package com.nexofinance.backend.repository;
+package com.nexofinance.backend.domain.user;
 
-import com.nexofinance.backend.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,7 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    @DisplayName("Should persist and find user by email")
+    @DisplayName("Deve persistir e buscar usuário por e-mail no PostgreSQL")
     void shouldSaveAndFindUserByEmail() {
         User user = User.builder()
                 .name("Ítalo Sousa")
@@ -42,7 +41,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("Should check if user exists by email")
+    @DisplayName("Deve verificar a existência de usuário por e-mail")
     void shouldCheckUserExistenceByEmail() {
         User user = User.builder()
                 .name("Existing User")

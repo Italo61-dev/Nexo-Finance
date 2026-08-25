@@ -1,6 +1,5 @@
-package com.nexofinance.backend.repository;
+package com.nexofinance.backend.domain.user;
 
-import com.nexofinance.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
