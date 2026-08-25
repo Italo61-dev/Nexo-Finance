@@ -1,6 +1,7 @@
 package com.nexofinance.backend.common.exception;
 
 import com.nexofinance.backend.domain.user.exception.EmailAlreadyExistsException;
+import com.nexofinance.backend.domain.user.exception.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,20 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUserNotFoundException(
+            UserNotFoundException exception,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
+    }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<ErrorResponseDTO> handleEmailAlreadyExistsException(
