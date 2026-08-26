@@ -1,5 +1,6 @@
 package com.nexofinance.backend.common.exception;
 
+import com.nexofinance.backend.domain.auth.exception.InvalidCredentialsException;
 import com.nexofinance.backend.domain.user.exception.EmailAlreadyExistsException;
 import com.nexofinance.backend.domain.user.exception.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,20 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidCredentialsException(
+            InvalidCredentialsException exception,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Unauthorized",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponseDTO);
+    }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleUserNotFoundException(
