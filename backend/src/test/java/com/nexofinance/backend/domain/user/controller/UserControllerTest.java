@@ -1,5 +1,8 @@
 package com.nexofinance.backend.domain.user.controller;
 
+import com.nexofinance.backend.domain.auth.TokenService;
+import com.nexofinance.backend.domain.user.User;
+import com.nexofinance.backend.domain.user.UserRepository;
 import com.nexofinance.backend.domain.user.UserService;
 import com.nexofinance.backend.domain.user.dto.RegisterUserRequestDTO;
 import com.nexofinance.backend.domain.user.dto.UpdateUserRequestDTO;
@@ -49,6 +52,12 @@ class UserControllerTest {
 
     @MockitoBean
     private UserService userService;
+
+    @Autowired
+    private TokenService tokenService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // --- CREATE TESTS ---
 
@@ -124,6 +133,36 @@ class UserControllerTest {
     }
 
     // --- READ BY ID TESTS ---
+
+    @Test
+    @DisplayName("Deve buscar usuário por ID com sucesso utilizando token Bearer JWT real")
+    void shouldFindUserByIdWithRealBearerToken() throws Exception {
+        User user = userRepository.save(User.builder()
+                .name("Ítalo Real")
+                .email("real.bearer@nexofinance.com")
+                .passwordHash("encoded_pass")
+                .build());
+
+        String token = tokenService.generateToken(user);
+
+        UserResponseDTO responseDTO = new UserResponseDTO(
+                user.getId(),
+                "Ítalo Real",
+                "real.bearer@nexofinance.com",
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+        when(userService.findUserById(user.getId())).thenReturn(responseDTO);
+
+        mockMvc.perform(get("/api/v1/users/" + user.getId())
+                        .contextPath("/api/v1")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(user.getId()))
+                .andExpect(jsonPath("$.name").value("Ítalo Real"))
+                .andExpect(jsonPath("$.email").value("real.bearer@nexofinance.com"));
+    }
 
     @Test
     @DisplayName("Deve retornar status 401 Unauthorized ao tentar buscar usuário por ID sem autenticação")
