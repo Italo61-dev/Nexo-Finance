@@ -14,6 +14,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -125,6 +126,15 @@ class UserControllerTest {
     // --- READ BY ID TESTS ---
 
     @Test
+    @DisplayName("Deve retornar status 401 Unauthorized ao tentar buscar usuário por ID sem autenticação")
+    void shouldReturnUnauthorizedWhenFindingUserByIdWithoutAuth() throws Exception {
+        mockMvc.perform(get("/api/v1/users/1")
+                        .contextPath("/api/v1"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
     @DisplayName("Deve buscar usuário por ID e retornar status 200 OK")
     void shouldFindUserByIdSuccessfully() throws Exception {
         UserResponseDTO responseDTO = new UserResponseDTO(
@@ -146,6 +156,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar status 404 Not Found quando usuário não for encontrado por ID")
     void shouldReturnNotFoundWhenUserDoesNotExistById() throws Exception {
         when(userService.findUserById(99L)).thenThrow(new UserNotFoundException(99L));
@@ -161,6 +172,15 @@ class UserControllerTest {
     // --- READ ALL (PAGINATED) TESTS ---
 
     @Test
+    @DisplayName("Deve retornar status 401 Unauthorized ao tentar listar usuários sem autenticação")
+    void shouldReturnUnauthorizedWhenListingUsersWithoutAuth() throws Exception {
+        mockMvc.perform(get("/api/v1/users")
+                        .contextPath("/api/v1"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
     @DisplayName("Deve listar usuários de forma paginada e retornar status 200 OK")
     void shouldFindAllUsersPaginated() throws Exception {
         UserResponseDTO userDTO = new UserResponseDTO(
@@ -185,6 +205,19 @@ class UserControllerTest {
     // --- UPDATE TESTS ---
 
     @Test
+    @DisplayName("Deve retornar status 401 Unauthorized ao tentar atualizar usuário sem autenticação")
+    void shouldReturnUnauthorizedWhenUpdatingUserWithoutAuth() throws Exception {
+        UpdateUserRequestDTO updateDTO = new UpdateUserRequestDTO("Novo Nome", "novo@test.com");
+
+        mockMvc.perform(put("/api/v1/users/1")
+                        .contextPath("/api/v1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
     @DisplayName("Deve atualizar perfil do usuário com sucesso e retornar status 200 OK")
     void shouldUpdateUserProfileSuccessfully() throws Exception {
         UpdateUserRequestDTO updateDTO = new UpdateUserRequestDTO("Novo Nome", "novo.email@nexofinance.com");
@@ -210,6 +243,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar status 404 Not Found ao tentar atualizar usuário inexistente")
     void shouldReturnNotFoundWhenUpdatingNonExistentUser() throws Exception {
         UpdateUserRequestDTO updateDTO = new UpdateUserRequestDTO("Nome", "email@test.com");
@@ -226,6 +260,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar status 409 Conflict ao tentar atualizar com e-mail já utilizado por outro usuário")
     void shouldReturnConflictWhenUpdatingWithAlreadyUsedEmail() throws Exception {
         UpdateUserRequestDTO updateDTO = new UpdateUserRequestDTO("Nome", "outro.usuario@test.com");
@@ -246,6 +281,15 @@ class UserControllerTest {
     // --- DELETE TESTS ---
 
     @Test
+    @DisplayName("Deve retornar status 401 Unauthorized ao tentar deletar usuário sem autenticação")
+    void shouldReturnUnauthorizedWhenDeletingUserWithoutAuth() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/1")
+                        .contextPath("/api/v1"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
     @DisplayName("Deve deletar usuário por ID com sucesso e retornar status 204 No Content")
     void shouldDeleteUserByIdSuccessfully() throws Exception {
         doNothing().when(userService).deleteUserById(1L);
@@ -256,6 +300,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar status 404 Not Found ao tentar deletar usuário inexistente")
     void shouldReturnNotFoundWhenDeletingNonExistentUser() throws Exception {
         doThrow(new UserNotFoundException(99L)).when(userService).deleteUserById(99L);
