@@ -25,3 +25,24 @@ html, body {
 *, *::before, *::after {
   box-sizing: inherit;
 }
+
+/* Alinhamento e espaçamento sênior para botões com ícones no Angular Material */
+.mat-mdc-button-base {
+  .mdc-button__label {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem;
+    vertical-align: middle;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

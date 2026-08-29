@@ -1,0 +1,89 @@
+<div class="home-container">
+  <!-- Top Navigation Bar -->
+  <mat-toolbar class="home-toolbar">
+    <div class="toolbar-brand">
+      <div class="logo-circle">
+        <mat-icon>account_balance_wallet</mat-icon>
+      </div>
+      <span class="brand-text">Nexo Finance</span>
+    </div>
+
+    <span class="toolbar-spacer"></span>
+
+    <div class="user-actions">
+      <mat-chip class="auth-chip" highlighted>
+        <mat-icon matChipAvatar>verified_user</mat-icon>
+        Sessão Autenticada
+      </mat-chip>
+
+      <button mat-stroked-button color="warn" (click)="onLogout()" class="logout-button">
+        <mat-icon>logout</mat-icon>
+        <span>Sair</span>
+      </button>
+    </div>
+  </mat-toolbar>
+
+  <!-- Main Content Dashboard Preview -->
+  <main class="dashboard-content">
+    <!-- Welcome Hero Card -->
+    <mat-card class="welcome-card" appearance="outlined">
+      <mat-card-content>
+        <div class="welcome-header">
+          <div class="welcome-icon-box">
+            <mat-icon>rocket_launch</mat-icon>
+          </div>
+          <div>
+            <h1 class="welcome-title">Bem-vindo ao Nexo Finance!</h1>
+            <p class="welcome-subtitle">
+              Sua autenticação via JWT foi validada com sucesso pelo backend Spring Boot.
+            </p>
+          </div>
+        </div>
+
+        <div class="token-banner">
+          <mat-icon class="shield-icon">security</mat-icon>
+          <div class="token-details">
+            <strong>Token JWT Ativo:</strong>
+            <span class="token-code">{{ tokenPreview ? (tokenPreview.substring(0, 32) + '...') : 'Disponível na sessão' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Financial Cards Preview (Fases 3 e 4) -->
+    <div class="metrics-grid">
+      <mat-card class="metric-card balance-card" appearance="outlined">
+        <mat-card-content>
+          <div class="metric-header">
+            <span>Saldo Total</span>
+            <mat-icon class="metric-icon">account_balance</mat-icon>
+          </div>
+          <h2 class="metric-value">R$ 0,00</h2>
+          <p class="metric-note">Pronto para receber seus primeiros lançamentos</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card income-card" appearance="outlined">
+        <mat-card-content>
+          <div class="metric-header">
+            <span>Receitas</span>
+            <mat-icon class="metric-icon text-success">arrow_downward</mat-icon>
+          </div>
+          <h2 class="metric-value text-success">R$ 0,00</h2>
+          <p class="metric-note">Fase 3 - Categorias e Lançamentos</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card expense-card" appearance="outlined">
+        <mat-card-content>
+          <div class="metric-header">
+            <span>Despesas</span>
+            <mat-icon class="metric-icon text-danger">arrow_upward</mat-icon>
+          </div>
+          <h2 class="metric-value text-danger">R$ 0,00</h2>
+          <p class="metric-note">Fase 3 - Categorias e Lançamentos</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </main>
+</div>

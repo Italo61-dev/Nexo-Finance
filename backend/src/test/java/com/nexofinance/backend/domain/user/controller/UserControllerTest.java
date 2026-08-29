@@ -137,9 +137,10 @@ class UserControllerTest {
     @Test
     @DisplayName("Deve buscar usuário por ID com sucesso utilizando token Bearer JWT real")
     void shouldFindUserByIdWithRealBearerToken() throws Exception {
+        String uniqueEmail = "real.bearer." + System.currentTimeMillis() + "@nexofinance.com";
         User user = userRepository.save(User.builder()
                 .name("Ítalo Real")
-                .email("real.bearer@nexofinance.com")
+                .email(uniqueEmail)
                 .passwordHash("encoded_pass")
                 .build());
 
@@ -148,7 +149,7 @@ class UserControllerTest {
         UserResponseDTO responseDTO = new UserResponseDTO(
                 user.getId(),
                 "Ítalo Real",
-                "real.bearer@nexofinance.com",
+                uniqueEmail,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
@@ -161,7 +162,7 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.name").value("Ítalo Real"))
-                .andExpect(jsonPath("$.email").value("real.bearer@nexofinance.com"));
+                .andExpect(jsonPath("$.email").value(uniqueEmail));
     }
 
     @Test
