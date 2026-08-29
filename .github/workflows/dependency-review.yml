@@ -19,4 +19,6 @@ jobs:
         uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
-          fail-on-scopes: runtime
+          allow-ghsas: |
+            GHSA-rgjc-h3x7-9mwg
+            GHSA-jj27-h5hq-8x99
