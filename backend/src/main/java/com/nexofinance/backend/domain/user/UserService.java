@@ -73,10 +73,10 @@ public class UserService {
 
     @Transactional
     public void deleteUserById(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException(id);
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
 
-        userRepository.deleteById(id);
+        user.setActive(false);
+        userRepository.save(user);
     }
 }

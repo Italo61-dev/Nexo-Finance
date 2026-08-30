@@ -1,6 +1,8 @@
 package com.nexofinance.backend.common.exception;
 
 import com.nexofinance.backend.domain.auth.exception.InvalidCredentialsException;
+import com.nexofinance.backend.domain.auth.exception.InvalidPasswordException;
+import com.nexofinance.backend.domain.auth.exception.InvalidTokenException;
 import com.nexofinance.backend.domain.user.exception.EmailAlreadyExistsException;
 import com.nexofinance.backend.domain.user.exception.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +29,34 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponseDTO);
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidTokenException(
+            InvalidTokenException exception,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidPasswordException(
+            InvalidPasswordException exception,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
     }
 
     @ExceptionHandler(UserNotFoundException.class)

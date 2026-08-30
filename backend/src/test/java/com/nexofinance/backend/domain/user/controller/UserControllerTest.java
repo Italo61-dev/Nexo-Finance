@@ -67,7 +67,7 @@ class UserControllerTest {
         RegisterUserRequestDTO requestDTO = new RegisterUserRequestDTO(
                 "Ítalo Sousa",
                 "italo@nexofinance.com",
-                "password123"
+                "Password123!"
         );
 
         UserResponseDTO responseDTO = new UserResponseDTO(
@@ -116,7 +116,7 @@ class UserControllerTest {
         RegisterUserRequestDTO requestDTO = new RegisterUserRequestDTO(
                 "Usuario Existente",
                 "duplicado@nexofinance.com",
-                "password123"
+                "Password123!"
         );
 
         when(userService.register(any(RegisterUserRequestDTO.class)))
