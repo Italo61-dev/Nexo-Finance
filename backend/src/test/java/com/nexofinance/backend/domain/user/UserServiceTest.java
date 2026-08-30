@@ -47,32 +47,32 @@ class UserServiceTest {
         RegisterUserRequestDTO requestDTO = new RegisterUserRequestDTO(
                 "Ítalo Sousa",
                 "Italo@Example.com",
-                "password123"
+                "Password123!"
         );
 
         when(userRepository.existsByEmail("italo@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encoded_hash");
+        when(passwordEncoder.encode("Password123!")).thenReturn("encoded_hash");
 
         User savedUser = User.builder()
                 .id(1L)
                 .name("Ítalo Sousa")
                 .email("italo@example.com")
                 .passwordHash("encoded_hash")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .active(true)
                 .build();
 
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
-        UserResponseDTO response = userService.register(requestDTO);
+        UserResponseDTO responseDTO = userService.register(requestDTO);
 
-        assertThat(response).isNotNull();
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.name()).isEqualTo("Ítalo Sousa");
-        assertThat(response.email()).isEqualTo("italo@example.com");
+        assertThat(responseDTO).isNotNull();
+        assertThat(responseDTO.id()).isEqualTo(1L);
+        assertThat(responseDTO.name()).isEqualTo("Ítalo Sousa");
+        assertThat(responseDTO.email()).isEqualTo("italo@example.com");
+        assertThat(responseDTO.active()).isTrue();
 
         verify(userRepository).existsByEmail("italo@example.com");
-        verify(passwordEncoder).encode("password123");
+        verify(passwordEncoder).encode("Password123!");
         verify(userRepository).save(any(User.class));
     }
 
@@ -82,7 +82,7 @@ class UserServiceTest {
         RegisterUserRequestDTO requestDTO = new RegisterUserRequestDTO(
                 "Existing User",
                 "existing@example.com",
-                "password123"
+                "Password123!"
         );
 
         when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
@@ -199,25 +199,33 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Deve deletar usuário por ID com sucesso")
+    @DisplayName("Deve inativar (soft delete) usuário por ID com sucesso")
     void shouldDeleteUserByIdSuccessfully() {
-        when(userRepository.existsById(1L)).thenReturn(true);
+        User user = User.builder()
+                .id(1L)
+                .name("Ítalo")
+                .email("italo@test.com")
+                .active(true)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         userService.deleteUserById(1L);
 
-        verify(userRepository).existsById(1L);
-        verify(userRepository).deleteById(1L);
+        verify(userRepository).findById(1L);
+        verify(userRepository).save(user);
+        assertThat(user.getActive()).isFalse();
     }
 
     @Test
     @DisplayName("Deve lançar UserNotFoundException ao tentar deletar usuário inexistente")
     void shouldThrowExceptionWhenDeletingNonExistentUser() {
-        when(userRepository.existsById(99L)).thenReturn(false);
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.deleteUserById(99L))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessage("Usuário não encontrado para o ID: 99");
 
-        verify(userRepository, never()).deleteById(any());
+        verify(userRepository, never()).save(any());
     }
 }

@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "USERS")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,19 +38,23 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 150)
+    @Column(name = "NAME", nullable = false, length = 150)
     private String name;
 
-    @Column(name = "email", nullable = false, unique = true, length = 150)
+    @Column(name = "EMAIL", nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
+    @Column(name = "PASSWORD_HASH", nullable = false, length = 255)
     private String passwordHash;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    @Column(name = "ACTIVE", nullable = false)
+    private Boolean active = true;
+
+    @Column(name = "CREATED_AT", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "UPDATED_AT", nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist
@@ -97,6 +101,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return Boolean.TRUE.equals(active);
     }
 }

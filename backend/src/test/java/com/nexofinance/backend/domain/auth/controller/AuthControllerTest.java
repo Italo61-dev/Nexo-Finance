@@ -2,8 +2,13 @@ package com.nexofinance.backend.domain.auth.controller;
 
 import com.nexofinance.backend.domain.auth.AuthService;
 import com.nexofinance.backend.domain.auth.dto.AuthResponseDTO;
+import com.nexofinance.backend.domain.auth.dto.ForgotPasswordRequestDTO;
 import com.nexofinance.backend.domain.auth.dto.LoginRequestDTO;
+import com.nexofinance.backend.domain.auth.dto.MessageResponseDTO;
+import com.nexofinance.backend.domain.auth.dto.ResetPasswordRequestDTO;
 import com.nexofinance.backend.domain.auth.exception.InvalidCredentialsException;
+import com.nexofinance.backend.domain.auth.exception.InvalidPasswordException;
+import com.nexofinance.backend.domain.auth.exception.InvalidTokenException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,5 +89,101 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.error").value("Unauthorized"))
                 .andExpect(jsonPath("$.message").value("Credenciais inválidas: e-mail ou senha incorretos"));
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 200 OK ao solicitar recuperação de senha com e-mail válido")
+    void shouldReturnOkWhenRequestingPasswordResetWithValidEmail() throws Exception {
+        ForgotPasswordRequestDTO requestDTO = new ForgotPasswordRequestDTO("italo@nexofinance.com");
+        MessageResponseDTO responseDTO = new MessageResponseDTO("Se o e-mail informado estiver cadastrado, as instruções foram enviadas.");
+
+        when(authService.requestPasswordReset(any(ForgotPasswordRequestDTO.class))).thenReturn(responseDTO);
+
+        mockMvc.perform(post("/api/v1/auth/forgot-password")
+                        .contextPath("/api/v1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Se o e-mail informado estiver cadastrado, as instruções foram enviadas."));
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 400 Bad Request ao solicitar recuperação de senha com e-mail inválido")
+    void shouldReturnBadRequestWhenRequestingPasswordResetWithInvalidEmail() throws Exception {
+        ForgotPasswordRequestDTO requestDTO = new ForgotPasswordRequestDTO("formato_invalido");
+
+        mockMvc.perform(post("/api/v1/auth/forgot-password")
+                        .contextPath("/api/v1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.validationErrors").isArray());
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 200 OK ao redefinir senha com token e nova senha válidos")
+    void shouldReturnOkWhenResettingPasswordWithValidData() throws Exception {
+        ResetPasswordRequestDTO requestDTO = new ResetPasswordRequestDTO("valid-token-123", "NewPassword123!");
+        MessageResponseDTO responseDTO = new MessageResponseDTO("Senha redefinida com sucesso.");
+
+        when(authService.resetPassword(any(ResetPasswordRequestDTO.class))).thenReturn(responseDTO);
+
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                        .contextPath("/api/v1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Senha redefinida com sucesso."));
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 400 Bad Request ao redefinir senha com senha que viola a política de segurança")
+    void shouldReturnBadRequestWhenResettingPasswordWithWeakPassword() throws Exception {
+        ResetPasswordRequestDTO requestDTO = new ResetPasswordRequestDTO("valid-token-123", "fraca");
+
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                        .contextPath("/api/v1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.validationErrors").isArray());
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 400 Bad Request quando a nova senha for igual à anterior")
+    void shouldReturnBadRequestWhenNewPasswordMatchesPreviousPassword() throws Exception {
+        ResetPasswordRequestDTO requestDTO = new ResetPasswordRequestDTO("valid-token-123", "SamePassword123!");
+
+        when(authService.resetPassword(any(ResetPasswordRequestDTO.class)))
+                .thenThrow(new InvalidPasswordException("A nova senha não pode ser igual à senha anterior."));
+
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                        .contextPath("/api/v1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("A nova senha não pode ser igual à senha anterior."));
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 400 Bad Request e ErrorResponseDTO quando o token for inválido ou expirado")
+    void shouldReturnBadRequestWhenResetPasswordTokenIsInvalid() throws Exception {
+        ResetPasswordRequestDTO requestDTO = new ResetPasswordRequestDTO("token-expirado", "NewPassword123!");
+
+        when(authService.resetPassword(any(ResetPasswordRequestDTO.class)))
+                .thenThrow(new InvalidTokenException("O token de recuperação expirou. Solicite um novo link."));
+
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                        .contextPath("/api/v1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("O token de recuperação expirou. Solicite um novo link."));
     }
 }

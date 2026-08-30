@@ -56,7 +56,14 @@ export class ResetPasswordComponent implements OnInit {
   readonly hideConfirmPassword = signal(true);
 
   readonly resetForm = this.fb.group({
-    newPassword: ['', [Validators.required, Validators.minLength(6)]],
+    newPassword: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,}$')
+      ]
+    ],
     confirmPassword: ['', [Validators.required]]
   }, { validators: passwordMatchValidator });
 
