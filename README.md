@@ -23,8 +23,8 @@ Este repositório contém o backend da aplicação, construído com tecnologias 
 
 O backend do Nexo Finance é construído com as seguintes tecnologias:
 
-- **Java 17**: Versão mais recente da linguagem Java com suporte de longo prazo (LTS).
-- **Spring Boot 3**: Framework principal para a construção de aplicações web robustas e seguras.
+- **Java 17 (LTS)**: Versão do Java usada para compilar e executar o backend.
+- **Spring Boot 4**: Framework principal para a construção de aplicações web robustas e seguras.
 - **Spring Data JPA**: Para persistência de dados e interação com o banco de dados.
 - **Spring Security**: Para implementação de autenticação e autorização.
 - **PostgreSQL**: Banco de dados relacional, executado em um container Docker para desenvolvimento.
@@ -38,7 +38,7 @@ O backend do Nexo Finance é construído com as seguintes tecnologias:
 
 Antes de começar, certifique-se de que você tem as seguintes ferramentas instaladas em sua máquina:
 
-- [Java Development Kit (JDK) 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+- [Java Development Kit (JDK) 17](https://www.oracle.com/java/technologies/downloads/#java17)
 - [Apache Maven](https://maven.apache.org/download.cgi)
 - [Docker](https://www.docker.com/get-started)
 - [Docker Compose](https://docs.docker.com/compose/install/)
@@ -104,7 +104,37 @@ Com o banco de dados em execução, você pode iniciar a aplicação Spring Boot
 ./mvnw spring-boot:run
 ```
 
-A aplicação irá iniciar e se conectar automaticamente ao banco de dados no container Docker. Por padrão, o servidor estará disponível em `http://localhost:8080`.
+A aplicação irá iniciar e se conectar automaticamente ao banco de dados no container Docker. Por padrão, o servidor estará disponível em `http://localhost:8080` com as rotas da API sob o prefixo `/api/v1` (`http://localhost:8080/api/v1`).
+
+---
+
+## 🔑 Autenticação e Endpoints Principais
+
+A API utiliza tokens JWT (Bearer Token) para proteger os endpoints restritos.
+
+### Autenticação (Login)
+* **Rota:** `POST /api/v1/auth/login`
+* **Exemplo de Requisição:**
+  ```json
+  {
+    "email": "usuario@exemplo.com",
+    "password": "SuaSenha123@"
+  }
+  ```
+* **Exemplo de Resposta (200 OK):**
+  ```json
+  {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "tokenType": "Bearer",
+    "expiresInSeconds": 86400
+  }
+  ```
+
+### Cabeçalho de Autorização (Rotas Protegidas)
+Para rotas privadas, envie o token obtido no cabeçalho HTTP:
+```http
+Authorization: Bearer <SEU_TOKEN_JWT>
+```
 
 ---
 
@@ -133,10 +163,13 @@ backend/
 │   ├── main/
 │   │   ├── java/          # Código-fonte da aplicação
 │   │   └── resources/     # Arquivos de configuração e migrations
-│   │       ├── db/changelog/ # Migrations do Liquibase
-│   │       └── application.properties # Configurações do Spring
+│   │       ├── db/changelog/          # Migrations do Liquibase
+│   │       ├── application.yaml       # Configuração base
+│   │       ├── application-dev.yaml   # Perfil de desenvolvimento local
+│   │       ├── application-test.yaml  # Perfil de testes automatizados
+│   │       └── application-prod.yaml  # Perfil de produção
 │   └── test/
-│       └── java/          # Código dos testes
+│       └── java/          # Código dos testes unitários e de integração
 ├── mvnw                   # Script de execução do Maven para Linux/macOS
 ├── mvnw.cmd               # Script de execução do Maven para Windows
 └── pom.xml                # Arquivo de configuração do Maven
