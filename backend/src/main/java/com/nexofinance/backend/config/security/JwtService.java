@@ -8,8 +8,10 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nexofinance.backend.config.security.properties.JwtProperties;
 import com.nexofinance.backend.domain.auth.TokenService;
 import com.nexofinance.backend.domain.user.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -20,20 +22,27 @@ public class JwtService implements TokenService {
     private static final String CLAIM_NAME = "name";
 
     private final JwtProperties jwtProperties;
+    private final Clock clock;
     private final Algorithm algorithm;
     private final JWTVerifier verifier;
 
-    public JwtService(JwtProperties jwtProperties) {
+    @Autowired
+    public JwtService(JwtProperties jwtProperties, Clock clock) {
         this.jwtProperties = jwtProperties;
+        this.clock = clock;
         this.algorithm = Algorithm.HMAC256(jwtProperties.secret());
         this.verifier = JWT.require(this.algorithm)
                 .withIssuer(jwtProperties.issuer())
                 .build();
     }
 
+    public JwtService(JwtProperties jwtProperties) {
+        this(jwtProperties, Clock.systemUTC());
+    }
+
     @Override
     public String generateToken(User user) {
-        Instant now = Instant.now();
+        Instant now = Instant.now(clock);
         Instant expiresAt = now.plusSeconds(jwtProperties.expirationSeconds());
 
         return JWT.create()

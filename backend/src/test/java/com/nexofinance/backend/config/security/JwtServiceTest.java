@@ -2,13 +2,16 @@ package com.nexofinance.backend.config.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nexofinance.backend.config.security.properties.JwtProperties;
 import com.nexofinance.backend.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +46,26 @@ class JwtServiceTest {
         assertThat(jwtService.isTokenValid(token)).isTrue();
         assertThat(jwtService.extractSubject(token)).contains("italo@nexofinance.com");
         assertThat(jwtService.extractUserId(token)).contains(10L);
+    }
+
+    @Test
+    @DisplayName("Deve gerar token JWT utilizando Clock fixo respeitando issuedAt e expiresAt")
+    void shouldGenerateJwtTokenWithFixedClock() {
+        Instant fixedInstant = Instant.parse("2026-08-30T10:00:00Z");
+        Clock fixedClock = Clock.fixed(fixedInstant, ZoneOffset.UTC);
+        JwtService serviceWithFixedClock = new JwtService(jwtProperties, fixedClock);
+
+        User user = User.builder()
+                .id(1L)
+                .name("Teste Clock")
+                .email("clock@test.com")
+                .build();
+
+        String token = serviceWithFixedClock.generateToken(user);
+        DecodedJWT decoded = JWT.decode(token);
+
+        assertThat(decoded.getIssuedAtAsInstant()).isEqualTo(fixedInstant);
+        assertThat(decoded.getExpiresAtAsInstant()).isEqualTo(fixedInstant.plusSeconds(EXPIRATION_SECONDS));
     }
 
     @Test
