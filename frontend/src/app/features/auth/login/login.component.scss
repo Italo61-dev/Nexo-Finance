@@ -140,33 +140,18 @@
     }
   }
 
-  .google-button {
-    height: 48px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    border-radius: 12px;
-    border-color: #cbd5e1;
-    color: #334155;
-    background-color: #ffffff;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+  .google-button-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
 
-    ::ng-deep .mdc-button__label {
-      display: inline-flex;
-      align-items: center;
+    .google-btn-inner {
+      display: flex;
       justify-content: center;
-      gap: 0.75rem;
       width: 100%;
-    }
-
-    &:hover:not(:disabled) {
-      background-color: #f8fafc;
-      border-color: #94a3b8;
-    }
-
-    .google-icon {
-      flex-shrink: 0;
-      width: 20px;
-      height: 20px;
+      overflow: hidden;
     }
   }
 }

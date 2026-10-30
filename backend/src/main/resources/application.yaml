@@ -23,4 +23,4 @@ security:
     issuer: nexo-finance
   oauth2:
     google:
-      client-id: ${GOOGLE_CLIENT_ID:}
+      client-id: ${GOOGLE_CLIENT_ID:740644395958-ku4hnjhirpdagoua1c3gagm071g3cieh.apps.googleusercontent.com}
