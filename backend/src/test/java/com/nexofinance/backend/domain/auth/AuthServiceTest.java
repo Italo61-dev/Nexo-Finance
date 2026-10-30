@@ -2,12 +2,15 @@ package com.nexofinance.backend.domain.auth;
 
 import com.nexofinance.backend.domain.auth.dto.AuthResponseDTO;
 import com.nexofinance.backend.domain.auth.dto.ForgotPasswordRequestDTO;
+import com.nexofinance.backend.domain.auth.dto.GoogleLoginRequestDTO;
+import com.nexofinance.backend.domain.auth.dto.GoogleUserInfo;
 import com.nexofinance.backend.domain.auth.dto.LoginRequestDTO;
 import com.nexofinance.backend.domain.auth.dto.MessageResponseDTO;
 import com.nexofinance.backend.domain.auth.dto.ResetPasswordRequestDTO;
 import com.nexofinance.backend.domain.auth.exception.InvalidCredentialsException;
 import com.nexofinance.backend.domain.auth.exception.InvalidPasswordException;
 import com.nexofinance.backend.domain.auth.exception.InvalidTokenException;
+import com.nexofinance.backend.domain.user.AuthProvider;
 import com.nexofinance.backend.domain.user.User;
 import com.nexofinance.backend.domain.user.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -47,6 +50,9 @@ class AuthServiceTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private GoogleTokenVerifierService googleTokenVerifierService;
 
     @InjectMocks
     private AuthService authService;
@@ -322,5 +328,113 @@ class AuthServiceTest {
                 .hasMessage("A conta do usuário encontra-se inativa.");
 
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve autenticar e provisionar novo usuário (Just-in-Time) via Google")
+    void shouldProvisionAndAuthenticateNewUserWithGoogle() {
+        GoogleLoginRequestDTO requestDTO = new GoogleLoginRequestDTO("google-token-xyz");
+        GoogleUserInfo googleUserInfo = new GoogleUserInfo("google-sub-123", "novo@gmail.com", "Novo Usuário", true);
+
+        when(googleTokenVerifierService.verify("google-token-xyz")).thenReturn(googleUserInfo);
+        when(userRepository.findByEmail("novo@gmail.com")).thenReturn(Optional.empty());
+
+        User savedUser = User.builder()
+                .id(10L)
+                .name("Novo Usuário")
+                .email("novo@gmail.com")
+                .authProvider(AuthProvider.GOOGLE)
+                .providerId("google-sub-123")
+                .active(true)
+                .build();
+
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(tokenService.generateToken(any(User.class))).thenReturn("nexo_jwt_token");
+        when(tokenService.getExpirationSeconds()).thenReturn(86400L);
+
+        AuthResponseDTO response = authService.authenticateWithGoogle(requestDTO);
+
+        assertThat(response).isNotNull();
+        assertThat(response.token()).isEqualTo("nexo_jwt_token");
+        assertThat(response.tokenType()).isEqualTo("Bearer");
+        assertThat(response.expiresInSeconds()).isEqualTo(86400L);
+
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Deve autenticar com sucesso usuário já existente via Google sem duplicar")
+    void shouldAuthenticateExistingUserWithGoogle() {
+        GoogleLoginRequestDTO requestDTO = new GoogleLoginRequestDTO("google-token-xyz");
+        GoogleUserInfo googleUserInfo = new GoogleUserInfo("google-sub-456", "existente@gmail.com", "Usuário Existente", true);
+
+        User existingUser = User.builder()
+                .id(5L)
+                .name("Usuário Existente")
+                .email("existente@gmail.com")
+                .passwordHash("senha_antiga")
+                .authProvider(AuthProvider.LOCAL)
+                .active(true)
+                .build();
+
+        when(googleTokenVerifierService.verify("google-token-xyz")).thenReturn(googleUserInfo);
+        when(userRepository.findByEmail("existente@gmail.com")).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(existingUser)).thenReturn(existingUser);
+        when(tokenService.generateToken(existingUser)).thenReturn("nexo_jwt_token_existing");
+        when(tokenService.getExpirationSeconds()).thenReturn(86400L);
+
+        AuthResponseDTO response = authService.authenticateWithGoogle(requestDTO);
+
+        assertThat(response).isNotNull();
+        assertThat(response.token()).isEqualTo("nexo_jwt_token_existing");
+        assertThat(existingUser.getProviderId()).isEqualTo("google-sub-456");
+        verify(userRepository).save(existingUser);
+    }
+
+    @Test
+    @DisplayName("Deve lançar InvalidTokenException quando a conta do usuário existente estiver inativa no login Google")
+    void shouldThrowInvalidTokenExceptionWhenExistingGoogleUserIsInactive() {
+        GoogleLoginRequestDTO requestDTO = new GoogleLoginRequestDTO("google-token-xyz");
+        GoogleUserInfo googleUserInfo = new GoogleUserInfo("google-sub-789", "inativo@gmail.com", "Inativo", true);
+
+        User inactiveUser = User.builder()
+                .id(7L)
+                .name("Inativo")
+                .email("inativo@gmail.com")
+                .active(false)
+                .build();
+
+        when(googleTokenVerifierService.verify("google-token-xyz")).thenReturn(googleUserInfo);
+        when(userRepository.findByEmail("inativo@gmail.com")).thenReturn(Optional.of(inactiveUser));
+        when(userRepository.save(inactiveUser)).thenReturn(inactiveUser);
+
+        assertThatThrownBy(() -> authService.authenticateWithGoogle(requestDTO))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessage("A conta do usuário encontra-se inativa.");
+
+        verify(tokenService, never()).generateToken(any());
+    }
+
+    @Test
+    @DisplayName("Deve lançar InvalidCredentialsException ao tentar login tradicional de usuário sem senha (exclusivo Google)")
+    void shouldThrowInvalidCredentialsWhenUserHasNoPasswordHash() {
+        LoginRequestDTO loginDTO = new LoginRequestDTO("googleonly@gmail.com", "anyPassword");
+
+        User userWithoutPassword = User.builder()
+                .id(8L)
+                .name("Google Only")
+                .email("googleonly@gmail.com")
+                .passwordHash(null)
+                .authProvider(AuthProvider.GOOGLE)
+                .active(true)
+                .build();
+
+        when(userRepository.findByEmail("googleonly@gmail.com")).thenReturn(Optional.of(userWithoutPassword));
+
+        assertThatThrownBy(() -> authService.authenticate(loginDTO))
+                .isInstanceOf(InvalidCredentialsException.class)
+                .hasMessage("Credenciais inválidas: e-mail ou senha incorretos");
+
+        verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
 }

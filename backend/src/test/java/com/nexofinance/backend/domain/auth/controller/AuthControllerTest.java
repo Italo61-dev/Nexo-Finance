@@ -3,6 +3,7 @@ package com.nexofinance.backend.domain.auth.controller;
 import com.nexofinance.backend.domain.auth.AuthService;
 import com.nexofinance.backend.domain.auth.dto.AuthResponseDTO;
 import com.nexofinance.backend.domain.auth.dto.ForgotPasswordRequestDTO;
+import com.nexofinance.backend.domain.auth.dto.GoogleLoginRequestDTO;
 import com.nexofinance.backend.domain.auth.dto.LoginRequestDTO;
 import com.nexofinance.backend.domain.auth.dto.MessageResponseDTO;
 import com.nexofinance.backend.domain.auth.dto.ResetPasswordRequestDTO;
@@ -185,5 +186,56 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.error").value("Bad Request"))
                 .andExpect(jsonPath("$.message").value("O token de recuperação expirou. Solicite um novo link."));
+    }
+
+    @Test
+    @DisplayName("Deve autenticar com sucesso via Google e retornar status 200 OK com token JWT")
+    void shouldAuthenticateWithGoogleSuccessfully() throws Exception {
+        GoogleLoginRequestDTO requestDTO = new GoogleLoginRequestDTO("valid-google-id-token");
+        AuthResponseDTO authResponse = AuthResponseDTO.of("jwt_internal_google_token", 86400L);
+
+        when(authService.authenticateWithGoogle(any(GoogleLoginRequestDTO.class))).thenReturn(authResponse);
+
+        mockMvc.perform(post("/api/v1/auth/google")
+                        .contextPath("/api/v1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("jwt_internal_google_token"))
+                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.expiresInSeconds").value(86400L));
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 400 Bad Request ao tentar login Google sem idToken")
+    void shouldReturnBadRequestWhenGoogleLoginIdTokenIsMissing() throws Exception {
+        GoogleLoginRequestDTO requestDTO = new GoogleLoginRequestDTO("");
+
+        mockMvc.perform(post("/api/v1/auth/google")
+                        .contextPath("/api/v1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.validationErrors").isArray());
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 400 Bad Request quando token do Google for inválido")
+    void shouldReturnBadRequestWhenGoogleTokenIsInvalid() throws Exception {
+        GoogleLoginRequestDTO requestDTO = new GoogleLoginRequestDTO("invalid-google-token");
+
+        when(authService.authenticateWithGoogle(any(GoogleLoginRequestDTO.class)))
+                .thenThrow(new InvalidTokenException("Token do Google inválido ou não autenticado."));
+
+        mockMvc.perform(post("/api/v1/auth/google")
+                        .contextPath("/api/v1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("Token do Google inválido ou não autenticado."));
     }
 }

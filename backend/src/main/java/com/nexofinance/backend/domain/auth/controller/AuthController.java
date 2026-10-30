@@ -3,6 +3,7 @@ package com.nexofinance.backend.domain.auth.controller;
 import com.nexofinance.backend.domain.auth.AuthService;
 import com.nexofinance.backend.domain.auth.dto.AuthResponseDTO;
 import com.nexofinance.backend.domain.auth.dto.ForgotPasswordRequestDTO;
+import com.nexofinance.backend.domain.auth.dto.GoogleLoginRequestDTO;
 import com.nexofinance.backend.domain.auth.dto.LoginRequestDTO;
 import com.nexofinance.backend.domain.auth.dto.MessageResponseDTO;
 import com.nexofinance.backend.domain.auth.dto.ResetPasswordRequestDTO;
@@ -26,6 +27,14 @@ public class AuthController {
             @Valid @RequestBody LoginRequestDTO loginRequestDTO
     ) {
         AuthResponseDTO responseDTO = authService.authenticate(loginRequestDTO);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponseDTO> authenticateWithGoogle(
+            @Valid @RequestBody GoogleLoginRequestDTO requestDTO
+    ) {
+        AuthResponseDTO responseDTO = authService.authenticateWithGoogle(requestDTO);
         return ResponseEntity.ok(responseDTO);
     }
 

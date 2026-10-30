@@ -21,3 +21,6 @@ security:
   jwt:
     expiration-seconds: 86400
     issuer: nexo-finance
+  oauth2:
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}

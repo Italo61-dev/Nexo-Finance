@@ -3,3 +3,5 @@ databaseChangeLog:
       file: db/changelog/migrations/001-create-table-users.yaml
   - include:
       file: db/changelog/migrations/002-create-table-password-reset-tokens.yaml
+  - include:
+      file: db/changelog/migrations/003-add-oauth2-provider-to-users.yaml

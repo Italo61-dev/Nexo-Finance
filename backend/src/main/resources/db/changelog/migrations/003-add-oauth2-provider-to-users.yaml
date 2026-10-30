@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-add-oauth2-provider-to-users
+      author: italo
+      changes:
+        - dropNotNullConstraint:
+            tableName: USERS
+            columnName: PASSWORD_HASH
+            columnDataType: VARCHAR(255)
+        - addColumn:
+            tableName: USERS
+            columns:
+              - column:
+                  name: AUTH_PROVIDER
+                  type: VARCHAR(20)
+                  defaultValue: LOCAL
+                  constraints:
+                    nullable: false
+              - column:
+                  name: PROVIDER_ID
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true

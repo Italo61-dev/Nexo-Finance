@@ -2,6 +2,8 @@ package com.nexofinance.backend.domain.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,8 +46,16 @@ public class User implements UserDetails {
     @Column(name = "EMAIL", nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(name = "PASSWORD_HASH", nullable = false, length = 255)
+    @Column(name = "PASSWORD_HASH", length = 255)
     private String passwordHash;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(name = "AUTH_PROVIDER", nullable = false, length = 20)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
+    @Column(name = "PROVIDER_ID", length = 255)
+    private String providerId;
 
     @Builder.Default
     @Column(name = "ACTIVE", nullable = false)

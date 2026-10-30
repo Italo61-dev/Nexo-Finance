@@ -2,12 +2,15 @@ package com.nexofinance.backend.domain.auth;
 
 import com.nexofinance.backend.domain.auth.dto.AuthResponseDTO;
 import com.nexofinance.backend.domain.auth.dto.ForgotPasswordRequestDTO;
+import com.nexofinance.backend.domain.auth.dto.GoogleLoginRequestDTO;
+import com.nexofinance.backend.domain.auth.dto.GoogleUserInfo;
 import com.nexofinance.backend.domain.auth.dto.LoginRequestDTO;
 import com.nexofinance.backend.domain.auth.dto.MessageResponseDTO;
 import com.nexofinance.backend.domain.auth.dto.ResetPasswordRequestDTO;
 import com.nexofinance.backend.domain.auth.exception.InvalidCredentialsException;
 import com.nexofinance.backend.domain.auth.exception.InvalidPasswordException;
 import com.nexofinance.backend.domain.auth.exception.InvalidTokenException;
+import com.nexofinance.backend.domain.user.AuthProvider;
 import com.nexofinance.backend.domain.user.User;
 import com.nexofinance.backend.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ public class AuthService {
     private final TokenService tokenService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
+    private final GoogleTokenVerifierService googleTokenVerifierService;
 
     @Transactional(readOnly = true)
     public AuthResponseDTO authenticate(LoginRequestDTO loginRequestDTO) {
@@ -35,8 +39,43 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(InvalidCredentialsException::new);
 
-        if (!passwordEncoder.matches(loginRequestDTO.password(), user.getPasswordHash())) {
+        if (user.getPasswordHash() == null || !passwordEncoder.matches(loginRequestDTO.password(), user.getPasswordHash())) {
             throw new InvalidCredentialsException();
+        }
+
+        String token = tokenService.generateToken(user);
+
+        return AuthResponseDTO.of(token, tokenService.getExpirationSeconds());
+    }
+
+    @Transactional
+    public AuthResponseDTO authenticateWithGoogle(GoogleLoginRequestDTO requestDTO) {
+        GoogleUserInfo googleUserInfo = googleTokenVerifierService.verify(requestDTO.idToken());
+
+        String email = googleUserInfo.email().trim().toLowerCase();
+
+        User user = userRepository.findByEmail(email).map(existingUser -> {
+            if (existingUser.getAuthProvider() == null) {
+                existingUser.setAuthProvider(AuthProvider.GOOGLE);
+            }
+            if (existingUser.getProviderId() == null && googleUserInfo.sub() != null) {
+                existingUser.setProviderId(googleUserInfo.sub());
+            }
+            return userRepository.save(existingUser);
+        }).orElseGet(() -> {
+            User newUser = User.builder()
+                    .name(googleUserInfo.name() != null && !googleUserInfo.name().isBlank() ? googleUserInfo.name() : email)
+                    .email(email)
+                    .passwordHash(null)
+                    .authProvider(AuthProvider.GOOGLE)
+                    .providerId(googleUserInfo.sub())
+                    .active(true)
+                    .build();
+            return userRepository.save(newUser);
+        });
+
+        if (!Boolean.TRUE.equals(user.getActive())) {
+            throw new InvalidTokenException("A conta do usuário encontra-se inativa.");
         }
 
         String token = tokenService.generateToken(user);
