@@ -34,6 +34,7 @@ class UserTest {
 
         assertThat(user.getUsername()).isEqualTo("maria.souza@example.com");
         assertThat(user.getPassword()).isEqualTo("secret_hash");
+        assertThat(user.getRole()).isEqualTo(Role.ROLE_USER);
         assertThat(user.getAuthorities()).hasSize(1);
         assertThat(user.getAuthorities().iterator().next().getAuthority()).isEqualTo("ROLE_USER");
         assertThat(user.isAccountNonExpired()).isTrue();
@@ -43,13 +44,28 @@ class UserTest {
     }
 
     @Test
-    @DisplayName("Deve preencher os timestamps no PrePersist e PreUpdate")
+    @DisplayName("Deve atribuir autoridade de ROLE_ADMIN quando configurado com perfil administrador")
+    void shouldAssignAdminAuthorityWhenConfiguredAsAdmin() {
+        User admin = User.builder()
+                .name("Administrador")
+                .email("admin@nexofinance.com")
+                .role(Role.ROLE_ADMIN)
+                .build();
+
+        assertThat(admin.getRole()).isEqualTo(Role.ROLE_ADMIN);
+        assertThat(admin.getAuthorities()).hasSize(1);
+        assertThat(admin.getAuthorities().iterator().next().getAuthority()).isEqualTo("ROLE_ADMIN");
+    }
+
+    @Test
+    @DisplayName("Deve preencher os timestamps e garantir role padrão no PrePersist")
     void shouldPopulateTimestampsOnPrePersistAndPreUpdate() {
         User user = new User();
         user.onCreate();
 
         assertThat(user.getCreatedAt()).isNotNull();
         assertThat(user.getUpdatedAt()).isNotNull();
+        assertThat(user.getRole()).isEqualTo(Role.ROLE_USER);
 
         LocalDateTime previousUpdate = user.getUpdatedAt();
         user.onUpdate();

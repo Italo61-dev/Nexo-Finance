@@ -57,6 +57,11 @@ public class User implements UserDetails {
     @Column(name = "PROVIDER_ID", length = 255)
     private String providerId;
 
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(name = "ROLE", nullable = false, length = 20)
+    private Role role = Role.ROLE_USER;
+
     @Builder.Default
     @Column(name = "ACTIVE", nullable = false)
     private Boolean active = true;
@@ -72,6 +77,9 @@ public class User implements UserDetails {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
+        if (this.role == null) {
+            this.role = Role.ROLE_USER;
+        }
     }
 
     @PreUpdate
@@ -81,7 +89,8 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        Role currentRole = this.role != null ? this.role : Role.ROLE_USER;
+        return List.of(new SimpleGrantedAuthority(currentRole.name()));
     }
 
     @Override
