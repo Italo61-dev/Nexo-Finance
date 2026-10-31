@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nexofinance.backend.config.security.properties.JwtProperties;
 import com.nexofinance.backend.domain.auth.TokenService;
+import com.nexofinance.backend.domain.user.Role;
 import com.nexofinance.backend.domain.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class JwtService implements TokenService {
 
     private static final String CLAIM_USER_ID = "userId";
     private static final String CLAIM_NAME = "name";
+    private static final String CLAIM_ROLE = "role";
 
     private final JwtProperties jwtProperties;
     private final Clock clock;
@@ -44,12 +46,14 @@ public class JwtService implements TokenService {
     public String generateToken(User user) {
         Instant now = Instant.now(clock);
         Instant expiresAt = now.plusSeconds(jwtProperties.expirationSeconds());
+        Role role = user.getRole() != null ? user.getRole() : Role.ROLE_USER;
 
         return JWT.create()
                 .withIssuer(jwtProperties.issuer())
                 .withSubject(user.getEmail())
                 .withClaim(CLAIM_USER_ID, user.getId())
                 .withClaim(CLAIM_NAME, user.getName())
+                .withClaim(CLAIM_ROLE, role.name())
                 .withIssuedAt(now)
                 .withExpiresAt(expiresAt)
                 .sign(algorithm);
@@ -64,6 +68,13 @@ public class JwtService implements TokenService {
     public Optional<Long> extractUserId(String token) {
         return decodeTokenSafely(token)
                 .map(jwt -> jwt.getClaim(CLAIM_USER_ID).asLong());
+    }
+
+    @Override
+    public Optional<String> extractRole(String token) {
+        return decodeTokenSafely(token)
+                .map(jwt -> jwt.getClaim(CLAIM_ROLE).asString())
+                .filter(role -> !role.isBlank());
     }
 
     @Override

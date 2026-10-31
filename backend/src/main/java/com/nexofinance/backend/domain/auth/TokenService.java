@@ -12,6 +12,8 @@ public interface TokenService {
 
     Optional<Long> extractUserId(String token);
 
+    Optional<String> extractRole(String token);
+
     boolean isTokenValid(String token);
 
     long getExpirationSeconds();

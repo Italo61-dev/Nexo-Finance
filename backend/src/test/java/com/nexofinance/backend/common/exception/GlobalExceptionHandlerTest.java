@@ -12,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -99,6 +100,21 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().status()).isEqualTo(404);
         assertThat(response.getBody().message()).isEqualTo("Recurso não encontrado");
+    }
+
+    @Test
+    @DisplayName("Deve tratar AccessDeniedException retornando 403 Forbidden")
+    void shouldHandleAccessDeniedException() {
+        AccessDeniedException ex = new AccessDeniedException("Access denied");
+
+        ResponseEntity<ErrorResponseDTO> response = exceptionHandler.handleAccessDeniedException(ex, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().status()).isEqualTo(403);
+        assertThat(response.getBody().error()).isEqualTo("Forbidden");
+        assertThat(response.getBody().message()).contains("você não possui permissão");
+        assertThat(response.getBody().path()).isEqualTo("/api/v1/test");
     }
 
     @Test
