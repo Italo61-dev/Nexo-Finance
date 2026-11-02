@@ -4,3 +4,4 @@ export * from './components/metric-card/metric-card.component';
 export * from './components/button/button.component';
 export * from './components/skeleton-loader/skeleton-loader.component';
 export * from './components/empty-state/empty-state.component';
+export * from './components/confirm-dialog/confirm-dialog.component';

@@ -1,96 +1,526 @@
-<div class="auth-page-container">
-  <mat-card class="auth-card" appearance="outlined">
-    <div class="auth-header">
-      <div class="logo-wrapper">
-        <mat-icon class="logo-icon">account_balance_wallet</mat-icon>
+<div class="auth-split-wrapper">
+  <!-- Botão de Alternância de Tema Flutuante no Topo -->
+  <button
+    type="button"
+    class="login-theme-toggle"
+    (click)="onToggleTheme()"
+    [matTooltip]="themeService.isDarkMode() ? 'Alternar para Modo Claro' : 'Alternar para Modo Escuro'"
+    aria-label="Alternar tema visual"
+  >
+    <mat-icon>{{ themeService.isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
+
+  <!-- ======================================================================
+       COLUNA ESQUERDA: Livro 3D / Página Virando (Login <-> Cadastro / Esqueci Senha)
+       ====================================================================== -->
+  <div class="auth-form-column">
+    <div class="auth-3d-scene">
+      <div class="auth-flipper-3d" [class.is-flipped]="isFlipped()">
+
+        <!-- ==============================================================
+             FACE FRONTAL (LADO A): FORMULÁRIO DE LOGIN
+             ============================================================== -->
+        <div class="auth-card-face auth-card-front">
+          <div class="auth-form-inner">
+            <!-- Cabeçalho com Logo Oficial -->
+            <div class="auth-header">
+              <div class="brand-logo-lockup" (click)="backToLogin()">
+                <!-- Símbolo Oficial da Marca Nexo Finance (Fita 3D Contínua) -->
+                <svg class="brand-symbol" viewBox="0 0 120 120" width="46" height="46" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="splitRibbonGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#006B3C" />
+                      <stop offset="35%" stop-color="#00A859" />
+                      <stop offset="70%" stop-color="#00C468" />
+                      <stop offset="100%" stop-color="#1BF089" />
+                    </linearGradient>
+                    <linearGradient id="splitDiagGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#00E67A" />
+                      <stop offset="50%" stop-color="#00A859" />
+                      <stop offset="100%" stop-color="#004D2A" />
+                    </linearGradient>
+                    <filter id="splitShadow" x="-30%" y="-30%" width="160%" height="160%">
+                      <feDropShadow dx="-2" dy="4" stdDeviation="4" flood-color="#00331A" flood-opacity="0.45" />
+                    </filter>
+                    <radialGradient id="splitNodeGlow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#FFFFFF" />
+                      <stop offset="40%" stop-color="#E6F7EF" />
+                      <stop offset="100%" stop-color="#00A859" stop-opacity="0" />
+                    </radialGradient>
+                  </defs>
+                  <rect x="22" y="24" width="18" height="72" rx="9" fill="#006B3C" />
+                  <rect x="22" y="24" width="18" height="72" rx="9" fill="url(#splitRibbonGrad)" />
+                  <g filter="url(#splitShadow)">
+                    <path d="M 27 27 C 32 21 41 21 47 28 L 83 77 C 88 84 81 94 72 92 L 67 90 L 25 36 C 22 32 23 28 27 27 Z" fill="url(#splitDiagGrad)" />
+                  </g>
+                  <rect x="80" y="24" width="18" height="72" rx="9" fill="url(#splitRibbonGrad)" />
+                  <circle cx="89" cy="33" r="4.5" fill="#FFFFFF" opacity="0.9" />
+                  <circle cx="89" cy="33" r="8" fill="url(#splitNodeGlow)" opacity="0.75" />
+                </svg>
+
+                <div class="brand-text">
+                  <span class="brand-name-nexo">nexo</span>
+                  <span class="brand-name-finance">finance</span>
+                </div>
+              </div>
+
+              <h1 class="welcome-heading">Acesse sua conta</h1>
+              <p class="welcome-subheading">Gerencie seu dinheiro com simplicidade, segurança e controle total.</p>
+            </div>
+
+            <!-- Formulário de Login -->
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="auth-form">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>E-mail</mat-label>
+                <input
+                  matInput
+                  type="email"
+                  formControlName="email"
+                  placeholder="seu.email@exemplo.com"
+                  autocomplete="email"
+                  required
+                />
+                <mat-icon matPrefix>email</mat-icon>
+                @if (loginForm.get('email')?.hasError('required')) {
+                  <mat-error>O e-mail é obrigatório.</mat-error>
+                }
+                @if (loginForm.get('email')?.hasError('email')) {
+                  <mat-error>Informe um formato de e-mail válido.</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Senha</mat-label>
+                <input
+                  matInput
+                  [type]="hidePassword() ? 'password' : 'text'"
+                  formControlName="password"
+                  placeholder="Digite sua senha"
+                  autocomplete="current-password"
+                  required
+                />
+                <mat-icon matPrefix>lock</mat-icon>
+                <button
+                  mat-icon-button
+                  matSuffix
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                  [attr.aria-label]="hidePassword() ? 'Mostrar senha' : 'Ocultar senha'"
+                >
+                  <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                @if (loginForm.get('password')?.hasError('required')) {
+                  <mat-error>A senha é obrigatória.</mat-error>
+                }
+              </mat-form-field>
+
+              <div class="form-extra-actions">
+                <button type="button" class="text-link auth-inline-link" (click)="openForgotPassword()">
+                  Esqueceu sua senha?
+                </button>
+              </div>
+
+              <button
+                mat-flat-button
+                color="primary"
+                type="submit"
+                class="submit-button"
+                [disabled]="loginForm.invalid || isLoading()"
+              >
+                <span class="btn-content-wrapper">
+                  @if (isLoading()) {
+                    <mat-progress-spinner mode="indeterminate" diameter="20" class="button-spinner"></mat-progress-spinner>
+                    <span>Autenticando...</span>
+                  } @else {
+                    <mat-icon>login</mat-icon>
+                    <span>Entrar</span>
+                  }
+                </span>
+              </button>
+
+              <!-- Divisor Social -->
+              <div class="divider-container">
+                <span class="divider-line"></span>
+                <span class="divider-text">ou</span>
+                <span class="divider-line"></span>
+              </div>
+
+              <!-- Botão Google Customizado Oficial com GSI Overlay -->
+              <div class="custom-google-button-wrapper">
+                <div class="custom-google-btn">
+                  <svg class="google-svg-icon" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                  </svg>
+                  <span class="google-btn-text">Fazer Login com o Google</span>
+                </div>
+                <div #googleBtnContainer class="google-gsi-overlay"></div>
+              </div>
+            </form>
+
+            <footer class="auth-footer">
+              <p>
+                Não tem uma conta?
+                <button type="button" class="text-link auth-switch-btn highlight" (click)="openRegister()">
+                  Cadastre-se
+                </button>
+              </p>
+            </footer>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             FACE TRASEIRA (LADO B): CADASTRO OU ESQUECEU A SENHA
+             ============================================================== -->
+        <div class="auth-card-face auth-card-back">
+          <div class="auth-form-inner">
+            
+            @if (backFaceMode() === 'register') {
+              <!-- FORMULÁRIO DE CADASTRO -->
+              <div class="auth-header">
+                <div class="brand-logo-lockup" (click)="backToLogin()">
+                  <svg class="brand-symbol" viewBox="0 0 120 120" width="46" height="46" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="22" y="24" width="18" height="72" rx="9" fill="url(#splitRibbonGrad)" />
+                    <path d="M 27 27 C 32 21 41 21 47 28 L 83 77 C 88 84 81 94 72 92 L 67 90 L 25 36 C 22 32 23 28 27 27 Z" fill="url(#splitDiagGrad)" />
+                    <rect x="80" y="24" width="18" height="72" rx="9" fill="url(#splitRibbonGrad)" />
+                    <circle cx="89" cy="33" r="4.5" fill="#FFFFFF" opacity="0.9" />
+                  </svg>
+                  <div class="brand-text">
+                    <span class="brand-name-nexo">nexo</span>
+                    <span class="brand-name-finance">finance</span>
+                  </div>
+                </div>
+
+                <h1 class="welcome-heading">Crie sua conta</h1>
+                <p class="welcome-subheading">Acesso ilimitado e gratuito para gerenciar suas finanças com inteligência.</p>
+              </div>
+
+              <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" novalidate class="auth-form">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Nome completo</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    formControlName="name"
+                    placeholder="Ex: Carlos Silva"
+                    autocomplete="name"
+                    required
+                  />
+                  <mat-icon matPrefix>person</mat-icon>
+                  @if (registerForm.get('name')?.hasError('required')) {
+                    <mat-error>O nome é obrigatório.</mat-error>
+                  }
+                  @if (registerForm.get('name')?.hasError('minlength')) {
+                    <mat-error>Mínimo de 3 caracteres.</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>E-mail</mat-label>
+                  <input
+                    matInput
+                    type="email"
+                    formControlName="email"
+                    placeholder="seu.email@exemplo.com"
+                    autocomplete="email"
+                    required
+                  />
+                  <mat-icon matPrefix>email</mat-icon>
+                  @if (registerForm.get('email')?.hasError('required')) {
+                    <mat-error>O e-mail é obrigatório.</mat-error>
+                  }
+                  @if (registerForm.get('email')?.hasError('email')) {
+                    <mat-error>Informe um formato de e-mail válido.</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Senha</mat-label>
+                  <input
+                    matInput
+                    [type]="hideRegisterPassword() ? 'password' : 'text'"
+                    formControlName="password"
+                    placeholder="Crie uma senha segura"
+                    autocomplete="new-password"
+                    required
+                  />
+                  <mat-icon matPrefix>lock</mat-icon>
+                  <button
+                    mat-icon-button
+                    matSuffix
+                    type="button"
+                    (click)="toggleRegisterPasswordVisibility()"
+                    [attr.aria-label]="hideRegisterPassword() ? 'Mostrar senha' : 'Ocultar senha'"
+                  >
+                    <mat-icon>{{ hideRegisterPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </button>
+                  @if (registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched) {
+                    <mat-error>A senha é obrigatória.</mat-error>
+                  }
+                </mat-form-field>
+
+                <!-- Checklist Dinâmico de Segurança da Senha (ao vivo conforme digita) -->
+                <div class="password-checklist">
+                  <div class="checklist-header">
+                    <span class="checklist-title">Requisitos da senha:</span>
+                  </div>
+                  <div class="checklist-grid">
+                    <div class="checklist-item" [class.is-valid]="hasMinLength">
+                      <mat-icon class="check-icon">{{ hasMinLength ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                      <span>No mínimo 8 caracteres</span>
+                    </div>
+                    <div class="checklist-item" [class.is-valid]="hasUppercase">
+                      <mat-icon class="check-icon">{{ hasUppercase ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                      <span>Uma letra maiúscula (A-Z)</span>
+                    </div>
+                    <div class="checklist-item" [class.is-valid]="hasSpecialChar">
+                      <mat-icon class="check-icon">{{ hasSpecialChar ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                      <span>Um caractere especial (&#64;, #, $, etc.)</span>
+                    </div>
+                    <div class="checklist-item" [class.is-valid]="hasNumber">
+                      <mat-icon class="check-icon">{{ hasNumber ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                      <span>Pelo menos um número (0-9)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Confirmar Senha</mat-label>
+                  <input
+                    matInput
+                    [type]="hideRegisterConfirmPassword() ? 'password' : 'text'"
+                    formControlName="confirmPassword"
+                    placeholder="Repita sua senha"
+                    autocomplete="new-password"
+                    required
+                  />
+                  <mat-icon matPrefix>lock_outline</mat-icon>
+                  <button
+                    mat-icon-button
+                    matSuffix
+                    type="button"
+                    (click)="toggleRegisterConfirmPasswordVisibility()"
+                    [attr.aria-label]="hideRegisterConfirmPassword() ? 'Mostrar senha' : 'Ocultar senha'"
+                  >
+                    <mat-icon>{{ hideRegisterConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </button>
+                  @if (registerForm.get('confirmPassword')?.hasError('required')) {
+                    <mat-error>A confirmação de senha é obrigatória.</mat-error>
+                  }
+                  @if (registerForm.get('confirmPassword')?.hasError('passwordMismatch')) {
+                    <mat-error>As senhas não coincidem.</mat-error>
+                  }
+                </mat-form-field>
+
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="submit"
+                  class="submit-button"
+                  [disabled]="registerForm.invalid || isRegisterLoading()"
+                >
+                  <span class="btn-content-wrapper">
+                    @if (isRegisterLoading()) {
+                      <mat-progress-spinner mode="indeterminate" diameter="20" class="button-spinner"></mat-progress-spinner>
+                      <span>Criando sua conta...</span>
+                    } @else {
+                      <mat-icon>how_to_reg</mat-icon>
+                      <span>Finalizar Cadastro</span>
+                    }
+                  </span>
+                </button>
+              </form>
+
+              <footer class="auth-footer">
+                <p>
+                  Já possui uma conta?
+                  <button type="button" class="text-link auth-switch-btn highlight" (click)="backToLogin()">
+                    Fazer Login
+                  </button>
+                </p>
+              </footer>
+
+            } @else {
+              <!-- FORMULÁRIO DE RECUPERAÇÃO DE SENHA -->
+              <div class="auth-header">
+                <div class="brand-logo-lockup" (click)="backToLogin()">
+                  <svg class="brand-symbol" viewBox="0 0 120 120" width="46" height="46" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="22" y="24" width="18" height="72" rx="9" fill="url(#splitRibbonGrad)" />
+                    <path d="M 27 27 C 32 21 41 21 47 28 L 83 77 C 88 84 81 94 72 92 L 67 90 L 25 36 C 22 32 23 28 27 27 Z" fill="url(#splitDiagGrad)" />
+                    <rect x="80" y="24" width="18" height="72" rx="9" fill="url(#splitRibbonGrad)" />
+                    <circle cx="89" cy="33" r="4.5" fill="#FFFFFF" opacity="0.9" />
+                  </svg>
+                  <div class="brand-text">
+                    <span class="brand-name-nexo">nexo</span>
+                    <span class="brand-name-finance">finance</span>
+                  </div>
+                </div>
+
+                <h1 class="welcome-heading">Recuperar senha</h1>
+                <p class="welcome-subheading">Informe seu e-mail cadastrado e enviaremos o link para redefinir sua senha.</p>
+              </div>
+
+              @if (forgotSubmitted()) {
+                <div class="forgot-success-box">
+                  <div class="success-icon-wrapper">
+                    <mat-icon>mark_email_read</mat-icon>
+                  </div>
+                  <h3>Instruções enviadas!</h3>
+                  <p>Se o endereço informado estiver cadastrado em nosso sistema, você receberá o link em instantes.</p>
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="button"
+                    class="submit-button"
+                    (click)="backToLogin()"
+                  >
+                    <span class="btn-content-wrapper">
+                      <mat-icon>arrow_back</mat-icon>
+                      <span>Voltar ao Login</span>
+                    </span>
+                  </button>
+                </div>
+              } @else {
+                <form [formGroup]="forgotForm" (ngSubmit)="onForgotSubmit()" novalidate class="auth-form">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>E-mail</mat-label>
+                    <input
+                      matInput
+                      type="email"
+                      formControlName="email"
+                      placeholder="seu.email@exemplo.com"
+                      autocomplete="email"
+                      required
+                    />
+                    <mat-icon matPrefix>email</mat-icon>
+                    @if (forgotForm.get('email')?.hasError('required')) {
+                      <mat-error>O e-mail é obrigatório.</mat-error>
+                    }
+                    @if (forgotForm.get('email')?.hasError('email')) {
+                      <mat-error>Informe um formato de e-mail válido.</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="submit"
+                    class="submit-button"
+                    [disabled]="forgotForm.invalid || isForgotLoading()"
+                  >
+                    <span class="btn-content-wrapper">
+                      @if (isForgotLoading()) {
+                        <mat-progress-spinner mode="indeterminate" diameter="20" class="button-spinner"></mat-progress-spinner>
+                        <span>Enviando link...</span>
+                      } @else {
+                        <mat-icon>send</mat-icon>
+                        <span>Enviar Link de Recuperação</span>
+                      }
+                    </span>
+                  </button>
+                </form>
+
+                <footer class="auth-footer">
+                  <p>
+                    Lembrou sua senha?
+                    <button type="button" class="text-link auth-switch-btn highlight" (click)="backToLogin()">
+                      Voltar ao Login
+                    </button>
+                  </p>
+                </footer>
+              }
+
+            }
+
+          </div>
+        </div>
+
       </div>
-      <h1 class="brand-title">Nexo Finance</h1>
-      <p class="brand-subtitle">Acesse sua conta e controle seu dinheiro</p>
     </div>
+  </div>
 
-    <mat-card-content>
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="auth-form">
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>E-mail</mat-label>
-          <input
-            matInput
-            type="email"
-            formControlName="email"
-            placeholder="seu.email@exemplo.com"
-            autocomplete="email"
-            required
-          />
-          <mat-icon matPrefix>email</mat-icon>
-          @if (loginForm.get('email')?.hasError('required')) {
-            <mat-error>O e-mail é obrigatório.</mat-error>
-          }
-          @if (loginForm.get('email')?.hasError('email')) {
-            <mat-error>Informe um formato de e-mail válido.</mat-error>
-          }
-        </mat-form-field>
+  <!-- ======================================================================
+       COLUNA DIREITA: FIXA - Vitrine de Cartões 3D Nexo Finance (Nubank Style)
+       ====================================================================== -->
+  <div class="auth-hero-column desktop-only">
+    <div class="hero-backdrop-glow"></div>
+    <div class="hero-grid-pattern"></div>
 
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Senha</mat-label>
-          <input
-            matInput
-            [type]="hidePassword() ? 'password' : 'text'"
-            formControlName="password"
-            placeholder="Digite sua senha"
-            autocomplete="current-password"
-            required
-          />
-          <mat-icon matPrefix>lock</mat-icon>
-          <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            (click)="togglePasswordVisibility()"
-            [attr.aria-label]="hidePassword() ? 'Mostrar senha' : 'Ocultar senha'"
-          >
-            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-          @if (loginForm.get('password')?.hasError('required')) {
-            <mat-error>A senha é obrigatória.</mat-error>
-          }
-        </mat-form-field>
+    <div class="hero-inner-content">
+      <div class="hero-badge-tag">
+        <span class="badge-dot"></span>
+        <span>Fintech Platform</span>
+      </div>
 
-        <div class="form-extra-actions">
-          <a routerLink="/forgot-password" class="text-link">Esqueceu sua senha?</a>
+      <!-- Container dos Cartões Flutuantes em Perspectiva 3D -->
+      <div class="showcase-cards-wrapper">
+        <!-- Cartão Superior: Nexo Titanium Black -->
+        <div class="fintech-card card-titanium">
+          <div class="card-glass-specular"></div>
+          <div class="card-header-row">
+            <div class="card-brand-lockup">
+              <svg viewBox="0 0 120 120" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                <rect x="22" y="24" width="18" height="72" rx="9" fill="url(#splitRibbonGrad)" />
+                <path d="M 27 27 C 32 21 41 21 47 28 L 83 77 C 88 84 81 94 72 92 L 67 90 L 25 36 C 22 32 23 28 27 27 Z" fill="url(#splitDiagGrad)" />
+                <rect x="80" y="24" width="18" height="72" rx="9" fill="url(#splitRibbonGrad)" />
+              </svg>
+              <span class="card-brand-title">nexo</span>
+            </div>
+            <mat-icon class="contactless-icon">contactless</mat-icon>
+          </div>
+
+          <div class="card-chip-box"></div>
+
+          <div class="card-bottom-row">
+            <div class="card-number-line">•••• •••• •••• 8842</div>
+            <div class="card-holder-flex">
+              <div>
+                <span class="meta-label">Titular</span>
+                <span class="meta-name">CLIENTE NEXO</span>
+              </div>
+              <span class="card-tier titanium">titanium</span>
+            </div>
+          </div>
         </div>
 
-        <button
-          mat-flat-button
-          color="primary"
-          type="submit"
-          class="submit-button"
-          [disabled]="loginForm.invalid || isLoading()"
-        >
-          @if (isLoading()) {
-            <mat-progress-spinner mode="indeterminate" diameter="20" class="button-spinner"></mat-progress-spinner>
-            <span>Autenticando...</span>
-          } @else {
-            <ng-container>
-              <mat-icon>login</mat-icon>
-              <span>Entrar</span>
-            </ng-container>
-          }
-        </button>
+        <!-- Cartão Inferior: Nexo Emerald Platinum (Com ITALO NASCIMENTO) -->
+        <div class="fintech-card card-platinum">
+          <div class="card-glass-specular"></div>
+          <div class="card-header-row">
+            <div class="card-brand-lockup">
+              <svg viewBox="0 0 120 120" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                <rect x="22" y="24" width="18" height="72" rx="9" fill="url(#splitRibbonGrad)" />
+                <path d="M 27 27 C 32 21 41 21 47 28 L 83 77 C 88 84 81 94 72 92 L 67 90 L 25 36 C 22 32 23 28 27 27 Z" fill="url(#splitDiagGrad)" />
+                <rect x="80" y="24" width="18" height="72" rx="9" fill="url(#splitRibbonGrad)" />
+              </svg>
+              <span class="card-brand-title">nexo</span>
+            </div>
+            <mat-icon class="contactless-icon">contactless</mat-icon>
+          </div>
 
-        <!-- Divisor Social -->
-        <div class="divider-container">
-          <span class="divider-line"></span>
-          <span class="divider-text">ou</span>
-          <span class="divider-line"></span>
-        </div>
-     
-        <div class="google-button-wrapper">
-          <div #googleBtnContainer class="google-btn-inner"></div>
-        </div>
-      </form>
-    </mat-card-content>
+          <div class="card-chip-box gold"></div>
 
-    <mat-card-footer class="auth-footer">
-      <p>Não tem uma conta? <a routerLink="/register" class="text-link highlight">Cadastre-se</a></p>
-    </mat-card-footer>
-  </mat-card>
+          <div class="card-bottom-row">
+            <div class="card-number-line">•••• •••• •••• 1045</div>
+            <div class="card-holder-flex">
+              <div>
+                <span class="meta-label">Titular</span>
+                <span class="meta-name">ITALO NASCIMENTO</span>
+              </div>
+              <span class="card-tier platinum">platinum</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-caption-box">
+        <h2 class="hero-title">O controle do seu patrimônio em um só lugar.</h2>
+        <p class="hero-description">
+          Acompanhe lançamentos, planeje despesas e visualize seus resultados com inteligência e velocidade.
+        </p>
+      </div>
+    </div>
+  </div>
 </div>

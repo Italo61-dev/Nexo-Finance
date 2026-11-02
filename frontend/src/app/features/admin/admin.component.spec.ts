@@ -6,6 +6,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AdminUserSummary, PageResponse, PlatformMetrics } from '../../core/models/auth.models';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 
 describe('AdminComponent', () => {
   let component: AdminComponent;
@@ -13,6 +14,7 @@ describe('AdminComponent', () => {
   let adminServiceSpy: jasmine.SpyObj<AdminService>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
   let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
+  let dialogSpy: jasmine.SpyObj<MatDialog>;
   let router: Router;
 
   const mockUsersResponse: PageResponse<AdminUserSummary> = {
@@ -65,6 +67,7 @@ describe('AdminComponent', () => {
       'isAuthenticated'
     ]);
     snackBarSpy = jasmine.createSpyObj<MatSnackBar>('MatSnackBar', ['open']);
+    dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
 
     authServiceSpy.userEmail.and.returnValue('admin@nexofinance.com');
     authServiceSpy.isAdmin.and.returnValue(true);
@@ -79,7 +82,8 @@ describe('AdminComponent', () => {
         provideRouter([]),
         { provide: AdminService, useValue: adminServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
-        { provide: MatSnackBar, useValue: snackBarSpy }
+        { provide: MatSnackBar, useValue: snackBarSpy },
+        { provide: MatDialog, useValue: dialogSpy }
       ]
     }).compileComponents();
 
@@ -87,6 +91,9 @@ describe('AdminComponent', () => {
     fixture = TestBed.createComponent(AdminComponent);
     component = fixture.componentInstance;
     spyOn(component['snackBar'], 'open');
+    spyOn(component['dialog'], 'open').and.returnValue({
+      afterClosed: () => of(true)
+    } as any);
     fixture.detectChanges();
   });
 
@@ -153,5 +160,33 @@ describe('AdminComponent', () => {
     expect(adminServiceSpy.getUsers).toHaveBeenCalledWith(
       jasmine.objectContaining({ role: 'ROLE_ADMIN' })
     );
+  });
+
+  it('deve abrir o ConfirmDialogComponent ao acionar toggleRole para outro usuário', () => {
+    const otherUser = mockUsersResponse.content[1];
+
+    adminServiceSpy.updateUserRole.and.returnValue(of({
+      ...otherUser,
+      role: 'ROLE_ADMIN'
+    }));
+
+    component.toggleRole(otherUser);
+
+    expect(component['dialog'].open).toHaveBeenCalled();
+    expect(adminServiceSpy.updateUserRole).toHaveBeenCalledWith(otherUser.id, 'ROLE_ADMIN');
+  });
+
+  it('deve abrir o ConfirmDialogComponent ao acionar toggleStatus para outro usuário', () => {
+    const otherUser = mockUsersResponse.content[1];
+
+    adminServiceSpy.updateUserStatus.and.returnValue(of({
+      ...otherUser,
+      active: false
+    }));
+
+    component.toggleStatus(otherUser);
+
+    expect(component['dialog'].open).toHaveBeenCalled();
+    expect(adminServiceSpy.updateUserStatus).toHaveBeenCalledWith(otherUser.id, false);
   });
 });

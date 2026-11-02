@@ -4,6 +4,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { guestGuard } from './core/guards/guest.guard';
 import { AuthService } from './core/services/auth.service';
+import { MainLayoutComponent } from './core/layout/main-layout/main-layout.component';
 
 export const routes: Routes = [
   {
@@ -27,24 +28,30 @@ export const routes: Routes = [
     canActivate: [guestGuard]
   },
   {
-    path: 'home',
-    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
-    canActivate: [authGuard]
-  },
-  {
-    path: 'home/admin',
-    redirectTo: 'admin',
-    pathMatch: 'full'
-  },
-  {
-    path: 'admin',
-    loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent),
-    canActivate: [authGuard, adminGuard]
-  },
-  {
     path: '',
-    redirectTo: () => (inject(AuthService).isAuthenticated() ? 'home' : 'login'),
-    pathMatch: 'full'
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'home',
+        loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
+      },
+      {
+        path: 'home/admin',
+        redirectTo: 'admin',
+        pathMatch: 'full'
+      },
+      {
+        path: 'admin',
+        loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent),
+        canActivate: [adminGuard]
+      },
+      {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full'
+      }
+    ]
   },
   {
     path: '**',

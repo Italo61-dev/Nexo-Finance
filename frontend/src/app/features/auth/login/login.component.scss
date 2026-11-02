@@ -1,118 +1,330 @@
-.auth-page-container {
-  min-height: 100vh;
+/* ==========================================================================
+   LAYOUT SPLIT-SCREEN AUTHENTICATION — NEXO FINANCE
+   ========================================================================== */
+
+.auth-split-wrapper {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--nexo-background);
+  font-family: var(--nexo-font-family);
+}
+
+/* Botão de Alternância de Tema Flutuante no Canto Superior Esquerdo */
+.login-theme-toggle {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 50;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--nexo-border);
+  background-color: var(--nexo-surface);
+  color: var(--nexo-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem 1rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  box-sizing: border-box;
-}
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
 
-.auth-card {
-  width: 100%;
-  max-width: 440px;
-  margin: auto;
-  border-radius: 24px;
-  background: #ffffff;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
-  padding: 2rem 1.5rem 1.5rem;
-  box-sizing: border-box;
+  &:hover {
+    transform: scale(1.08);
+    background-color: var(--nexo-surface-hover);
+    border-color: var(--nexo-primary);
+    color: var(--nexo-primary);
+  }
 
-  @media (max-width: 600px) {
-    padding: 1.5rem 1.25rem 1.25rem;
-    border-radius: 20px;
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }
 
-.auth-header {
-  text-align: center;
-  margin-bottom: 2rem;
+/* ==========================================================================
+   COLUNA ESQUERDA: Livro 3D / Página Virando (Login <-> Cadastro / Esqueci)
+   ========================================================================== */
 
-  .logo-wrapper {
+.auth-form-column {
+  flex: 1;
+  max-width: 580px;
+  min-width: 440px;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 3.5rem;
+  background-color: var(--nexo-surface);
+  border-right: 1px solid var(--nexo-border);
+  box-sizing: border-box;
+
+  @media (max-width: 1023px) {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+    border-right: none;
+    padding: 2.5rem 1.5rem;
+    background-color: var(--nexo-background);
+  }
+}
+
+/* Cenário 3D com Perspectiva */
+.auth-3d-scene {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  perspective: 1800px;
+  perspective-origin: center center;
+}
+
+/* Container Flipper com CSS Grid compartilhado para auto-altura perfeita */
+.auth-flipper-3d {
+  width: 100%;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.35, 1);
+
+  &.is-flipped {
+    transform: rotateY(180deg);
+  }
+}
+
+/* Faces do Cartão 3D */
+.auth-card-face {
+  grid-area: 1 / 1 / 2 / 2;
+  width: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-sizing: border-box;
+}
+
+.auth-card-front {
+  transform: rotateY(0deg);
+  z-index: 2;
+}
+
+.auth-card-back {
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+
+.auth-form-inner {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabeçalho do Formulário com Logo */
+.auth-header {
+  margin-bottom: 1.75rem;
+
+  .brand-logo-lockup {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    background: #eff6ff;
-    color: #2563eb;
-    margin-bottom: 0.75rem;
+    gap: 0.75rem;
+    text-decoration: none;
+    cursor: pointer;
+    margin-bottom: 1.25rem;
+    transition: transform var(--nexo-transition-fast);
 
-    .logo-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    .brand-symbol {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+
+      .brand-name-nexo {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--nexo-text-primary);
+      }
+
+      .brand-name-finance {
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: var(--nexo-primary);
+        letter-spacing: -0.01em;
+      }
     }
   }
 
-  .brand-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 0.5rem 0;
-    letter-spacing: -0.025em;
+  .welcome-heading {
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--nexo-text-primary);
+    margin: 0 0 0.4rem 0;
   }
 
-  .brand-subtitle {
+  .welcome-subheading {
     font-size: 0.95rem;
-    color: #64748b;
+    color: var(--nexo-text-secondary);
+    line-height: 1.45;
     margin: 0;
   }
 }
 
+/* Formulário de Autenticação */
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 0.4rem;
 
   .form-field {
     width: 100%;
 
+    // Tokens oficiais MDC Outline (sem risco de listra sobre o notch)
+    --mdc-outlined-text-field-outline-color: var(--nexo-border);
+    --mdc-outlined-text-field-focus-outline-color: var(--nexo-primary);
+    --mdc-outlined-text-field-hover-outline-color: var(--nexo-text-muted);
+    --mdc-outlined-text-field-container-shape: 12px;
+
+    ::ng-deep {
+      .mat-mdc-text-field-wrapper {
+        border-radius: 12px;
+      }
+
+      .mat-mdc-form-field-focus-overlay {
+        background-color: transparent;
+      }
+
+      // Elimina qualquer listra vertical ou corte horizontal no notch e bordas
+      .mdc-notched-outline__notch {
+        border-left: none !important;
+        border-right: none !important;
+      }
+
+      .mdc-notched-outline__leading {
+        border-right: none !important;
+      }
+
+      .mdc-notched-outline__trailing {
+        border-left: none !important;
+      }
+
+      .mdc-notched-outline--notched .mdc-notched-outline__notch {
+        border-top: none !important;
+      }
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__trailing {
+        border-color: var(--nexo-border);
+      }
+    }
+
     mat-icon {
-      color: #94a3b8;
+      color: var(--nexo-text-muted);
+    }
+  }
+
+  /* Checklist Dinâmico de Segurança da Senha ("Vai digitando e verificando") */
+  .password-checklist {
+    background-color: var(--nexo-surface-secondary);
+    border: 1px solid var(--nexo-border);
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+    margin: 0.15rem 0 0.5rem 0;
+    transition: all 0.25s ease;
+
+    .checklist-header {
+      margin-bottom: 0.35rem;
+      .checklist-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--nexo-text-muted);
+      }
+    }
+
+    .checklist-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.8rem;
+      color: var(--nexo-text-muted);
+      transition: color 0.2s ease, font-weight 0.2s ease;
+
+      .check-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        color: var(--nexo-text-muted);
+        transition: color 0.2s ease;
+      }
+
+      &.is-valid {
+        color: var(--nexo-text-primary);
+        font-weight: 600;
+
+        .check-icon {
+          color: var(--nexo-neon);
+        }
+      }
     }
   }
 
   .form-extra-actions {
     display: flex;
     justify-content: flex-end;
-    margin-top: -0.5rem;
+    margin-top: -0.4rem;
     margin-bottom: 0.25rem;
   }
 
   .submit-button {
     height: 48px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     border-radius: 12px;
-    background-color: #2563eb;
+    background-color: var(--nexo-primary);
     color: #ffffff;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
-
-    ::ng-deep .mdc-button__label {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.625rem;
-      width: 100%;
-    }
-
-    mat-icon {
-      font-size: 22px;
-      width: 22px;
-      height: 22px;
-    }
+    box-shadow: 0 4px 14px var(--nexo-primary-glow);
+    transition: all 0.2s ease;
+    margin-top: 0.25rem;
 
     &:hover:not(:disabled) {
-      background-color: #1d4ed8;
+      background-color: var(--nexo-primary-hover);
+      box-shadow: 0 6px 20px rgba(0, 168, 89, 0.4);
     }
 
     &:disabled {
-      background-color: #94a3b8;
-      color: #f1f5f9;
+      background-color: var(--nexo-surface-secondary);
+      border: 1px solid var(--nexo-border);
+      color: var(--nexo-text-muted);
       cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-content-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
     }
 
     .button-spinner {
@@ -128,30 +340,119 @@
     .divider-line {
       flex: 1;
       height: 1px;
-      background-color: #e2e8f0;
+      background-color: var(--nexo-border);
     }
 
     .divider-text {
       padding: 0 0.75rem;
-      font-size: 0.85rem;
-      color: #94a3b8;
+      font-size: 0.8rem;
+      color: var(--nexo-text-muted);
       text-transform: uppercase;
-      font-weight: 500;
+      font-weight: 600;
     }
   }
 
-  .google-button-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  /* Botão Google Customizado sem fundo branco */
+  .custom-google-button-wrapper {
+    position: relative;
     width: 100%;
-    min-height: 44px;
+    height: 46px;
+    border-radius: 12px;
+    overflow: hidden;
 
-    .google-btn-inner {
-      display: flex;
-      justify-content: center;
+    .custom-google-btn {
       width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      background-color: var(--nexo-surface-secondary);
+      border: 1px solid var(--nexo-border);
+      color: var(--nexo-text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+
+      .google-svg-icon {
+        flex-shrink: 0;
+      }
+
+      .google-btn-text {
+        letter-spacing: -0.01em;
+      }
+    }
+
+    &:hover .custom-google-btn {
+      background-color: var(--nexo-surface-hover);
+      border-color: var(--nexo-text-muted);
+    }
+
+    .google-gsi-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.001;
+      cursor: pointer;
+      z-index: 5;
       overflow: hidden;
+    }
+  }
+}
+
+/* Sucesso do Esqueci Senha */
+.forgot-success-box {
+  text-align: center;
+  padding: 1rem 0;
+
+  .success-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(0, 168, 89, 0.15);
+    color: var(--nexo-neon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem auto;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--nexo-text-primary);
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: var(--nexo-text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1.75rem;
+  }
+
+  .submit-button {
+    width: 100%;
+    height: 48px;
+    font-weight: 700;
+    border-radius: 12px;
+    background-color: var(--nexo-primary);
+    color: #ffffff;
+
+    .btn-content-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
   }
 }
@@ -160,28 +461,318 @@
   text-align: center;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--nexo-border);
 
   p {
     margin: 0;
     font-size: 0.9rem;
-    color: #64748b;
+    color: var(--nexo-text-secondary);
   }
 }
 
 .text-link {
-  color: #2563eb;
+  color: var(--nexo-primary);
   text-decoration: none;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: color 0.2s ease;
 
   &:hover {
-    color: #1d4ed8;
+    color: var(--nexo-primary-hover);
     text-decoration: underline;
   }
 
   &.highlight {
-    font-weight: 600;
+    font-weight: 700;
+  }
+}
+
+.auth-inline-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.auth-switch-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--nexo-primary);
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    color: var(--nexo-primary-hover);
+    text-decoration: underline;
+  }
+}
+
+/* ==========================================================================
+   COLUNA DIREITA: FIXA - Hero Showcase com Cartões 3D Nexo Finance
+   ========================================================================== */
+
+.desktop-only {
+  @media (max-width: 1023px) {
+    display: none !important;
+  }
+}
+
+.auth-hero-column {
+  flex: 1.3;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 4rem;
+  background: radial-gradient(circle at 75% 25%, #004D2A 0%, #071710 45%, #050A08 100%);
+  box-sizing: border-box;
+
+  .hero-backdrop-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(27, 240, 137, 0.16) 0%, transparent 70%);
+    filter: blur(80px);
+    pointer-events: none;
+    top: 10%;
+    right: 5%;
+  }
+
+  .hero-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0, 168, 89, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 168, 89, 0.04) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+  }
+
+  .hero-inner-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 520px;
+    text-align: center;
+  }
+
+  .hero-badge-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--nexo-radius-full);
+    background: rgba(0, 168, 89, 0.15);
+    border: 1px solid rgba(27, 240, 137, 0.3);
+    color: var(--nexo-neon);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--nexo-neon);
+      box-shadow: 0 0 8px var(--nexo-neon);
+    }
+  }
+
+  /* Cartões Flutuantes em Perspectiva 3D */
+  .showcase-cards-wrapper {
+    position: relative;
+    width: 440px;
+    height: 330px;
+    margin: 1.5rem 0 2.5rem 0;
+    perspective: 1200px;
+  }
+
+  .fintech-card {
+    position: absolute;
+    width: 350px;
+    height: 215px;
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: #FFFFFF;
+    font-family: var(--nexo-font-family);
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+
+    .card-glass-specular {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+
+      .card-brand-lockup {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .card-brand-title {
+          font-weight: 800;
+          font-size: 1.15rem;
+          letter-spacing: -0.03em;
+          color: #FFFFFF;
+        }
+      }
+
+      .contactless-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: var(--nexo-neon);
+      }
+    }
+
+    .card-chip-box {
+      width: 40px;
+      height: 30px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #CCA762, #FFE4A0);
+      box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 2;
+
+      &.gold {
+        background: linear-gradient(135deg, #E6C280, #FFF1C5);
+      }
+    }
+
+    .card-bottom-row {
+      position: relative;
+      z-index: 2;
+
+      .card-number-line {
+        font-family: monospace;
+        font-size: 15px;
+        letter-spacing: 2.5px;
+        margin-bottom: 0.5rem;
+        color: #FFFFFF;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+      }
+
+      .card-holder-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+
+        .meta-label {
+          font-size: 9px;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.65);
+          letter-spacing: 0.05em;
+          display: block;
+        }
+
+        .meta-name {
+          font-size: 13px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+        }
+
+        .card-tier {
+          font-size: 16px;
+          font-weight: 800;
+          text-transform: lowercase;
+          letter-spacing: -0.02em;
+
+          &.titanium {
+            color: #A0B2AA;
+          }
+
+          &.platinum {
+            color: var(--nexo-neon);
+          }
+        }
+      }
+    }
+  }
+
+  /* Cartão Superior: Nexo Titanium Black */
+  .card-titanium {
+    top: 5px;
+    left: 10px;
+    z-index: 1;
+    transform: rotate(-8deg) translateY(10px);
+    background: linear-gradient(135deg, #182420 0%, #0B1210 65%, #00361E 100%);
+    border: 1px solid rgba(0, 168, 89, 0.35);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+
+    &:hover {
+      transform: rotate(-5deg) translateY(-2px) scale(1.02);
+      z-index: 3;
+    }
+  }
+
+  /* Cartão Inferior: Nexo Emerald Platinum (Com ITALO NASCIMENTO) */
+  .card-platinum {
+    bottom: 10px;
+    right: 10px;
+    z-index: 2;
+    transform: rotate(11deg) translateY(-8px);
+    background: linear-gradient(135deg, #00A859 0%, #006B3C 55%, #0B1210 100%);
+    border: 1px solid rgba(27, 240, 137, 0.5);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.8), 0 0 28px rgba(0, 168, 89, 0.3);
+
+    &:hover {
+      transform: rotate(8deg) translateY(-18px) scale(1.03);
+    }
+  }
+
+  .hero-caption-box {
+    .hero-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: #FFFFFF;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.35;
+    }
+
+    .hero-description {
+      font-size: 0.95rem;
+      color: #A0B2AA;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+}
+
+/* Modo Escuro */
+:host-context([data-theme="dark"]),
+:host-context(body.dark-theme) {
+  .text-link {
+    color: var(--nexo-neon);
+    &:hover {
+      color: #6effb9;
+    }
   }
 }

@@ -41,26 +41,8 @@
   --nexo-transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Modo Claro (Light Theme) */
-:root, [data-theme="light"], body.light-theme {
-  --nexo-background: #F7F9F8;
-  --nexo-surface: #FFFFFF;
-  --nexo-surface-secondary: #F0F4F2;
-  --nexo-surface-hover: #E9EFEF;
-  --nexo-border: #E2E8E5;
-  --nexo-border-subtle: #EDF2EF;
-  --nexo-text-primary: #0F1F17;
-  --nexo-text-secondary: #5A6B63;
-  --nexo-text-muted: #8E9F97;
-  --nexo-card-shadow: 0 8px 24px rgba(15, 31, 23, 0.05);
-  --nexo-card-shadow-hover: 0 12px 32px rgba(15, 31, 23, 0.09);
-  --nexo-sidebar-bg: #FFFFFF;
-  --nexo-sidebar-border: #E2E8E5;
-  --nexo-topbar-bg: rgba(255, 255, 255, 0.9);
-}
-
 /* Modo Escuro Padrão Oficial Fintech (Dark Theme) */
-[data-theme="dark"], body.dark-theme {
+:root, [data-theme="dark"], body.dark-theme {
   --nexo-background: #0B1210;
   --nexo-surface: #131A17;
   --nexo-surface-secondary: #1A2420;
@@ -75,6 +57,24 @@
   --nexo-sidebar-bg: #101614;
   --nexo-sidebar-border: #1C2723;
   --nexo-topbar-bg: rgba(19, 26, 23, 0.9);
+}
+
+/* Modo Claro Opcional (Light Theme) */
+[data-theme="light"], body.light-theme {
+  --nexo-background: #F7F9F8;
+  --nexo-surface: #FFFFFF;
+  --nexo-surface-secondary: #F0F4F2;
+  --nexo-surface-hover: #E9EFEF;
+  --nexo-border: #E2E8E5;
+  --nexo-border-subtle: #EDF2EF;
+  --nexo-text-primary: #0F1F17;
+  --nexo-text-secondary: #5A6B63;
+  --nexo-text-muted: #8E9F97;
+  --nexo-card-shadow: 0 8px 24px rgba(15, 31, 23, 0.05);
+  --nexo-card-shadow-hover: 0 12px 32px rgba(15, 31, 23, 0.09);
+  --nexo-sidebar-bg: #FFFFFF;
+  --nexo-sidebar-border: #E2E8E5;
+  --nexo-topbar-bg: rgba(255, 255, 255, 0.9);
 }
 
 /* ==========================================================================
@@ -101,6 +101,7 @@ html, body {
   font-family: var(--nexo-font-family);
   background-color: var(--nexo-background);
   color: var(--nexo-text-primary);
+  overflow-x: hidden;
   transition: background-color var(--nexo-transition-normal), color var(--nexo-transition-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -108,6 +109,22 @@ html, body {
 
 *, *::before, *::after {
   box-sizing: inherit;
+}
+
+/* Padronização de Ícones Angular Material */
+.mat-icon,
+mat-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  flex-shrink: 0;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
 }
 
 /* Scrollbar Personalizada e Moderna */
@@ -188,3 +205,65 @@ body.dark-theme .mat-mdc-table,
   background-color: var(--nexo-surface) !important;
   color: var(--nexo-text-primary) !important;
 }
+
+/* Angular Material Form Fields e Inputs no Modo Escuro */
+body.dark-theme .mat-mdc-form-field,
+[data-theme="dark"] .mat-mdc-form-field {
+  .mdc-text-field--outlined {
+    background-color: var(--nexo-surface) !important;
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--nexo-border) !important;
+    }
+
+    // Previne qualquer listra vertical ou corte horizontal indesejado nas peças do outline
+    .mdc-notched-outline__notch {
+      border-left: none !important;
+      border-right: none !important;
+    }
+
+    .mdc-notched-outline__leading {
+      border-right: none !important;
+    }
+
+    .mdc-notched-outline__trailing {
+      border-left: none !important;
+    }
+
+    .mdc-notched-outline--notched .mdc-notched-outline__notch {
+      border-top: none !important;
+    }
+
+    &:hover:not(.mdc-text-field--disabled) {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--nexo-text-muted) !important;
+      }
+    }
+
+    &.mdc-text-field--focused {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--nexo-primary) !important;
+      }
+    }
+  }
+
+  input.mat-mdc-input-element {
+    color: var(--nexo-text-primary) !important;
+    caret-color: var(--nexo-primary) !important;
+  }
+
+  .mat-mdc-floating-label {
+    color: var(--nexo-text-secondary) !important;
+  }
+
+  mat-icon {
+    color: var(--nexo-text-muted) !important;
+  }
+}
+
