@@ -1,0 +1,417 @@
+<div class="admin-container">
+  <!-- Topbar com navegação e identificação -->
+  <mat-toolbar class="admin-toolbar">
+    <div class="toolbar-brand" (click)="goToDashboard()">
+      <div class="logo-circle">
+        <mat-icon>shield</mat-icon>
+      </div>
+      <span class="brand-text">Nexo Admin</span>
+      <span class="badge-role">RBAC</span>
+    </div>
+
+    <span class="toolbar-spacer"></span>
+
+    <div class="toolbar-actions">
+      <button mat-stroked-button (click)="goToDashboard()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+        <span>Voltar ao App</span>
+      </button>
+
+      <div class="admin-profile-chip">
+        <mat-icon class="admin-icon">admin_panel_settings</mat-icon>
+        <span class="admin-email">{{ authService.userEmail() || 'Admin' }}</span>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <main class="admin-content">
+    <!-- Header do Painel -->
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Gestão de Usuários & Perfis</h1>
+        <p class="page-subtitle">
+          Gerencie acessos, controle papéis administrativos e monitore as contas registradas na plataforma.
+        </p>
+      </div>
+
+      <button mat-flat-button color="primary" class="refresh-button" (click)="loadMetrics(); loadUsers()" [disabled]="loading()">
+        <mat-icon>refresh</mat-icon>
+        <span>Atualizar Dados</span>
+      </button>
+    </header>
+
+    <!-- Cards de Métricas Consolidadas -->
+    <section class="metrics-grid">
+      <mat-card class="metric-card" appearance="outlined">
+        <mat-card-content>
+          <div class="metric-header">
+            <span class="metric-label">Total de Usuários</span>
+            <div class="metric-icon-box bg-blue">
+              <mat-icon>group</mat-icon>
+            </div>
+          </div>
+          <div class="metric-value">
+            @if (loadingMetrics()) {
+              <mat-spinner diameter="24"></mat-spinner>
+            } @else {
+              {{ metrics()?.totalUsers ?? 0 }}
+            }
+          </div>
+          <p class="metric-desc">Contas cadastradas no sistema</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card" appearance="outlined">
+        <mat-card-content>
+          <div class="metric-header">
+            <span class="metric-label">Administradores</span>
+            <div class="metric-icon-box bg-green">
+              <mat-icon>security</mat-icon>
+            </div>
+          </div>
+          <div class="metric-value text-green">
+            @if (loadingMetrics()) {
+              <mat-spinner diameter="24"></mat-spinner>
+            } @else {
+              {{ metrics()?.totalAdmins ?? 0 }}
+            }
+          </div>
+          <p class="metric-desc">Perfis com acesso total</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card" appearance="outlined">
+        <mat-card-content>
+          <div class="metric-header">
+            <span class="metric-label">Adesão Google OAuth</span>
+            <div class="metric-icon-box bg-purple">
+              <mat-icon>cloud_done</mat-icon>
+            </div>
+          </div>
+          <div class="metric-value text-purple">
+            @if (loadingMetrics()) {
+              <mat-spinner diameter="24"></mat-spinner>
+            } @else {
+              {{ metrics()?.googleAuthPercent ?? 0 }}%
+            }
+          </div>
+          <p class="metric-desc">Login social unificado</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card" appearance="outlined">
+        <mat-card-content>
+          <div class="metric-header">
+            <span class="metric-label">Contas Bloqueadas</span>
+            <div class="metric-icon-box bg-red">
+              <mat-icon>person_off</mat-icon>
+            </div>
+          </div>
+          <div class="metric-value text-red">
+            @if (loadingMetrics()) {
+              <mat-spinner diameter="24"></mat-spinner>
+            } @else {
+              {{ metrics()?.inactiveUsers ?? 0 }}
+            }
+          </div>
+          <p class="metric-desc">Acesso preventivo revogado</p>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Barra de Filtros e Busca -->
+    <section class="filter-section">
+      <div class="search-box">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          placeholder="Buscar por nome ou e-mail..."
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="onSearch()"
+          class="search-input"
+        />
+        @if (searchTerm) {
+          <button mat-icon-button (click)="searchTerm = ''; onSearch()" class="clear-btn">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+        <button mat-flat-button color="primary" class="search-btn" (click)="onSearch()">
+          Buscar
+        </button>
+      </div>
+
+      <div class="filter-tabs">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="selectedFilter === 'ALL'"
+          (click)="onFilterChange('ALL')"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="selectedFilter === 'ADMINS'"
+          (click)="onFilterChange('ADMINS')"
+        >
+          <mat-icon class="tab-icon">security</mat-icon>
+          Admins
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="selectedFilter === 'USERS'"
+          (click)="onFilterChange('USERS')"
+        >
+          <mat-icon class="tab-icon">person</mat-icon>
+          Usuários
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="selectedFilter === 'INACTIVE'"
+          (click)="onFilterChange('INACTIVE')"
+        >
+          <mat-icon class="tab-icon">block</mat-icon>
+          Bloqueados
+        </button>
+      </div>
+    </section>
+
+    <!-- Tabela Desktop e Cards Mobile -->
+    <section class="users-container">
+      @if (loading()) {
+        <div class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Carregando usuários da plataforma...</p>
+        </div>
+      } @else if (users().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon-box">
+            <mat-icon>search_off</mat-icon>
+          </div>
+          <h3>Nenhum usuário encontrado</h3>
+          <p>Tente ajustar os termos da busca ou selecione outro filtro acima.</p>
+          <button mat-stroked-button (click)="searchTerm = ''; onFilterChange('ALL')">
+            Limpar Filtros
+          </button>
+        </div>
+      } @else {
+        <!-- Tabela Visível em Desktop -->
+        <div class="desktop-table-wrapper">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>Usuário</th>
+                <th>Provedor</th>
+                <th>Cargo (Role)</th>
+                <th>Status</th>
+                <th>Criado em</th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of users(); track user.id) {
+                <tr [class.current-user-row]="isCurrentUser(user)">
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar-initials" [class.avatar-admin]="user.role === 'ROLE_ADMIN'">
+                        {{ getUserInitials(user.name) }}
+                      </div>
+                      <div class="user-meta">
+                        <div class="user-name">
+                          <strong>{{ user.name }}</strong>
+                          @if (isCurrentUser(user)) {
+                            <span class="you-badge">Você</span>
+                          }
+                        </div>
+                        <span class="user-email">{{ user.email }}</span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="provider-badge" [class.provider-google]="user.authProvider === 'GOOGLE'">
+                      <mat-icon class="provider-icon">
+                        {{ user.authProvider === 'GOOGLE' ? 'g_mobiledata' : 'email' }}
+                      </mat-icon>
+                      {{ user.authProvider }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="role-badge" [class.role-admin]="user.role === 'ROLE_ADMIN'">
+                      <mat-icon class="role-icon">
+                        {{ user.role === 'ROLE_ADMIN' ? 'security' : 'person' }}
+                      </mat-icon>
+                      {{ user.role === 'ROLE_ADMIN' ? 'Administrador' : 'Usuário' }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="status-badge" [class.status-active]="user.active" [class.status-inactive]="!user.active">
+                      <span class="status-dot"></span>
+                      {{ user.active ? 'Ativo' : 'Bloqueado' }}
+                    </span>
+                  </td>
+
+                  <td class="date-cell">
+                    {{ user.createdAt ? (user.createdAt | date:'dd/MM/yyyy HH:mm') : '—' }}
+                  </td>
+
+                  <td class="text-right">
+                    <div class="actions-cell">
+                      @if (processingUserId() === user.id) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                      } @else {
+                        <!-- Botão de Cargo -->
+                        <button
+                          mat-button
+                          class="action-btn"
+                          [class.btn-demote]="user.role === 'ROLE_ADMIN'"
+                          [class.btn-promote]="user.role !== 'ROLE_ADMIN'"
+                          [disabled]="isCurrentUser(user)"
+                          [matTooltip]="isCurrentUser(user) ? 'Regra de segurança: você não pode alterar seu próprio cargo' : (user.role === 'ROLE_ADMIN' ? 'Rebaixar para Usuário' : 'Promover a Administrador')"
+                          (click)="toggleRole(user)"
+                        >
+                          <mat-icon>{{ user.role === 'ROLE_ADMIN' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+                          <span>{{ user.role === 'ROLE_ADMIN' ? 'Rebaixar' : 'Promover' }}</span>
+                        </button>
+
+                        <!-- Botão de Status -->
+                        <button
+                          mat-button
+                          class="action-btn"
+                          [class.btn-block]="user.active"
+                          [class.btn-activate]="!user.active"
+                          [disabled]="isCurrentUser(user)"
+                          [matTooltip]="isCurrentUser(user) ? 'Regra de segurança: você não pode desativar sua própria conta' : (user.active ? 'Bloquear Acesso' : 'Ativar Conta')"
+                          (click)="toggleStatus(user)"
+                        >
+                          <mat-icon>{{ user.active ? 'block' : 'check_circle' }}</mat-icon>
+                          <span>{{ user.active ? 'Bloquear' : 'Ativar' }}</span>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Cards Visíveis em Telas Mobile -->
+        <div class="mobile-cards-list">
+          @for (user of users(); track user.id) {
+            <mat-card class="mobile-user-card" appearance="outlined" [class.current-user-card]="isCurrentUser(user)">
+              <mat-card-content>
+                <div class="mobile-card-header">
+                  <div class="avatar-initials" [class.avatar-admin]="user.role === 'ROLE_ADMIN'">
+                    {{ getUserInitials(user.name) }}
+                  </div>
+                  <div class="mobile-meta">
+                    <div class="mobile-name">
+                      <strong>{{ user.name }}</strong>
+                      @if (isCurrentUser(user)) {
+                        <span class="you-badge">Você</span>
+                      }
+                    </div>
+                    <span class="user-email">{{ user.email }}</span>
+                  </div>
+                </div>
+
+                <div class="mobile-badges">
+                  <span class="role-badge" [class.role-admin]="user.role === 'ROLE_ADMIN'">
+                    <mat-icon class="role-icon">
+                      {{ user.role === 'ROLE_ADMIN' ? 'security' : 'person' }}
+                    </mat-icon>
+                    {{ user.role === 'ROLE_ADMIN' ? 'Admin' : 'Usuário' }}
+                  </span>
+
+                  <span class="status-badge" [class.status-active]="user.active" [class.status-inactive]="!user.active">
+                    <span class="status-dot"></span>
+                    {{ user.active ? 'Ativo' : 'Bloqueado' }}
+                  </span>
+
+                  <span class="provider-badge" [class.provider-google]="user.authProvider === 'GOOGLE'">
+                    {{ user.authProvider }}
+                  </span>
+                </div>
+
+                <div class="mobile-card-actions">
+                  @if (processingUserId() === user.id) {
+                    <div class="mobile-spinner-box">
+                      <mat-spinner diameter="24"></mat-spinner>
+                      <span>Processando...</span>
+                    </div>
+                  } @else if (isCurrentUser(user)) {
+                    <div class="self-protection-banner">
+                      <mat-icon>lock</mat-icon>
+                      <span>Sua conta está protegida contra auto-modificação</span>
+                    </div>
+                  } @else {
+                    <button
+                      mat-stroked-button
+                      class="mobile-btn"
+                      [class.btn-demote]="user.role === 'ROLE_ADMIN'"
+                      [class.btn-promote]="user.role !== 'ROLE_ADMIN'"
+                      (click)="toggleRole(user)"
+                    >
+                      <mat-icon>{{ user.role === 'ROLE_ADMIN' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+                      <span>{{ user.role === 'ROLE_ADMIN' ? 'Rebaixar' : 'Promover' }}</span>
+                    </button>
+
+                    <button
+                      mat-stroked-button
+                      class="mobile-btn"
+                      [class.btn-block]="user.active"
+                      [class.btn-activate]="!user.active"
+                      (click)="toggleStatus(user)"
+                    >
+                      <mat-icon>{{ user.active ? 'block' : 'check_circle' }}</mat-icon>
+                      <span>{{ user.active ? 'Bloquear' : 'Ativar' }}</span>
+                    </button>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+
+        <!-- Barra de Paginação -->
+        <footer class="pagination-footer">
+          <div class="pagination-info">
+            Mostrando <strong>{{ users().length }}</strong> de <strong>{{ totalElements }}</strong> usuários registrados
+          </div>
+
+          <div class="pagination-controls">
+            <button
+              mat-stroked-button
+              (click)="onPageChange(currentPage - 1)"
+              [disabled]="currentPage === 0 || loading()"
+              class="page-nav-btn"
+            >
+              <mat-icon>chevron_left</mat-icon>
+              <span>Anterior</span>
+            </button>
+
+            <span class="page-counter">
+              Página <strong>{{ currentPage + 1 }}</strong> de <strong>{{ totalPages || 1 }}</strong>
+            </span>
+
+            <button
+              mat-stroked-button
+              (click)="onPageChange(currentPage + 1)"
+              [disabled]="currentPage + 1 >= totalPages || loading()"
+              class="page-nav-btn"
+            >
+              <span>Próxima</span>
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </footer>
+      }
+    </section>
+  </main>
+</div>

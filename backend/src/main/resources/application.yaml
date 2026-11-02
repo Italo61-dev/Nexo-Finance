@@ -17,6 +17,13 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+        max-page-size: 100
+      page-serialization-mode: via-dto
+
 security:
   jwt:
     expiration-seconds: 86400

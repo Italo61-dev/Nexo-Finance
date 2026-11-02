@@ -8,6 +8,12 @@ describe('AuthService', () => {
   let service: AuthService;
   let httpTesting: HttpTestingController;
 
+  function createMockJwt(payload: object): string {
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const body = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return `${header}.${body}.mock-signature`;
+  }
+
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({
@@ -30,15 +36,50 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
+  it('deve decodificar claim de role e identificar administrador quando ROLE_ADMIN', () => {
+    const adminToken = createMockJwt({
+      sub: 'admin@nexofinance.com',
+      role: 'ROLE_ADMIN'
+    });
+
+    service.saveToken(adminToken);
+
+    expect(service.role()).toBe('ROLE_ADMIN');
+    expect(service.isAdmin()).toBeTrue();
+    expect(service.userEmail()).toBe('admin@nexofinance.com');
+  });
+
+  it('deve identificar usuário comum quando role for ROLE_USER', () => {
+    const userToken = createMockJwt({
+      sub: 'user@nexofinance.com',
+      role: 'ROLE_USER'
+    });
+
+    service.saveToken(userToken);
+
+    expect(service.role()).toBe('ROLE_USER');
+    expect(service.isAdmin()).toBeFalse();
+    expect(service.userEmail()).toBe('user@nexofinance.com');
+  });
+
+  it('deve retornar null para role e isAdmin false quando não houver token ou token for malformado', () => {
+    service.saveToken('token-invalido');
+
+    expect(service.role()).toBeNull();
+    expect(service.isAdmin()).toBeFalse();
+    expect(service.userEmail()).toBeNull();
+  });
+
   it('deve realizar login e persistir o token no localStorage e no Signal', () => {
     const mockCredentials: LoginRequest = { email: 'teste@nexofinance.com', password: 'password123' };
-    const mockResponse: AuthResponse = { token: 'mock-jwt-token-123', type: 'Bearer' };
+    const mockToken = createMockJwt({ sub: 'teste@nexofinance.com', role: 'ROLE_USER' });
+    const mockResponse: AuthResponse = { token: mockToken, type: 'Bearer' };
 
     service.login(mockCredentials).subscribe(response => {
       expect(response).toEqual(mockResponse);
-      expect(service.token()).toBe('mock-jwt-token-123');
+      expect(service.token()).toBe(mockToken);
       expect(service.isAuthenticated()).toBeTrue();
-      expect(localStorage.getItem('nexo_token')).toBe('mock-jwt-token-123');
+      expect(localStorage.getItem('nexo_token')).toBe(mockToken);
     });
 
     const req = httpTesting.expectOne('/api/v1/auth/login');
@@ -62,12 +103,15 @@ describe('AuthService', () => {
   });
 
   it('deve remover token ao efetuar logout', () => {
-    service.saveToken('token-ativo');
+    const mockToken = createMockJwt({ sub: 'ativo@nexofinance.com', role: 'ROLE_USER' });
+    service.saveToken(mockToken);
     expect(service.isAuthenticated()).toBeTrue();
 
     service.logout();
     expect(service.token()).toBeNull();
     expect(service.isAuthenticated()).toBeFalse();
+    expect(service.role()).toBeNull();
+    expect(service.isAdmin()).toBeFalse();
     expect(localStorage.getItem('nexo_token')).toBeNull();
   });
 });

@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nexofinance.backend.config.security.properties.JwtProperties;
+import com.nexofinance.backend.domain.user.Role;
 import com.nexofinance.backend.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,6 +47,40 @@ class JwtServiceTest {
         assertThat(jwtService.isTokenValid(token)).isTrue();
         assertThat(jwtService.extractSubject(token)).contains("italo@nexofinance.com");
         assertThat(jwtService.extractUserId(token)).contains(10L);
+        assertThat(jwtService.extractRole(token)).contains(Role.ROLE_USER.name());
+    }
+
+    @Test
+    @DisplayName("Deve gerar token JWT com role ROLE_ADMIN e extrair corretamente")
+    void shouldGenerateJwtTokenWithAdminRole() {
+        User adminUser = User.builder()
+                .id(1L)
+                .name("Admin User")
+                .email("admin@nexofinance.com")
+                .role(Role.ROLE_ADMIN)
+                .build();
+
+        String token = jwtService.generateToken(adminUser);
+
+        assertThat(token).isNotBlank();
+        assertThat(jwtService.isTokenValid(token)).isTrue();
+        assertThat(jwtService.extractSubject(token)).contains("admin@nexofinance.com");
+        assertThat(jwtService.extractUserId(token)).contains(1L);
+        assertThat(jwtService.extractRole(token)).contains(Role.ROLE_ADMIN.name());
+    }
+
+    @Test
+    @DisplayName("Deve retornar Optional vazio ao extrair role de token que não possui claim role")
+    void shouldReturnEmptyOptionalWhenRoleClaimIsMissing() {
+        String tokenWithoutRole = JWT.create()
+                .withIssuer(ISSUER)
+                .withSubject("user@test.com")
+                .withIssuedAt(Instant.now())
+                .withExpiresAt(Instant.now().plusSeconds(3600))
+                .sign(Algorithm.HMAC256(SECRET_KEY));
+
+        assertThat(jwtService.isTokenValid(tokenWithoutRole)).isTrue();
+        assertThat(jwtService.extractRole(tokenWithoutRole)).isEmpty();
     }
 
     @Test
@@ -81,6 +116,7 @@ class JwtServiceTest {
         assertThat(jwtService.isTokenValid(forgedToken)).isFalse();
         assertThat(jwtService.extractSubject(forgedToken)).isEmpty();
         assertThat(jwtService.extractUserId(forgedToken)).isEmpty();
+        assertThat(jwtService.extractRole(forgedToken)).isEmpty();
     }
 
     @Test
@@ -96,6 +132,7 @@ class JwtServiceTest {
         assertThat(jwtService.isTokenValid(expiredToken)).isFalse();
         assertThat(jwtService.extractSubject(expiredToken)).isEmpty();
         assertThat(jwtService.extractUserId(expiredToken)).isEmpty();
+        assertThat(jwtService.extractRole(expiredToken)).isEmpty();
     }
 
     @Test
@@ -105,5 +142,7 @@ class JwtServiceTest {
         assertThat(jwtService.isTokenValid("")).isFalse();
         assertThat(jwtService.extractSubject(null)).isEmpty();
         assertThat(jwtService.extractUserId("")).isEmpty();
+        assertThat(jwtService.extractRole(null)).isEmpty();
+        assertThat(jwtService.extractRole("")).isEmpty();
     }
 }

@@ -130,4 +130,27 @@ class JwtAuthenticationFilterTest {
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         verify(filterChain).doFilter(request, response);
     }
+
+    @Test
+    @DisplayName("Não deve autenticar quando o usuário estiver inativo (isEnabled = false)")
+    void shouldNotAuthenticateWhenUserIsInactive() throws ServletException, IOException {
+        String token = "valid_token";
+        String email = "inactive@nexofinance.com";
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(email)
+                .password("hash")
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_USER")))
+                .disabled(true)
+                .build();
+
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + token);
+        when(tokenService.isTokenValid(token)).thenReturn(true);
+        when(tokenService.extractSubject(token)).thenReturn(Optional.of(email));
+        when(userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
+
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verify(filterChain).doFilter(request, response);
+    }
 }

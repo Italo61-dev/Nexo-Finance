@@ -1,5 +1,6 @@
 package com.nexofinance.backend.common.exception;
 
+import com.nexofinance.backend.domain.admin.exception.SelfModificationException;
 import com.nexofinance.backend.domain.auth.exception.InvalidCredentialsException;
 import com.nexofinance.backend.domain.auth.exception.InvalidPasswordException;
 import com.nexofinance.backend.domain.auth.exception.InvalidTokenException;
@@ -11,6 +12,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -194,6 +196,67 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAccessDeniedException(
+            AccessDeniedException exception,
+            HttpServletRequest request
+    ) {
+        log.warn("Acesso negado para o recurso [{}]: {}", request.getRequestURI(), exception.getMessage());
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
+                "Acesso negado: você não possui permissão para acessar este recurso",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponseDTO);
+    }
+
+    @ExceptionHandler(SelfModificationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleSelfModificationException(
+            SelfModificationException exception,
+            HttpServletRequest request
+    ) {
+        log.warn("Tentativa de auto-modificação administrativa inválida [{}]: {}", request.getRequestURI(), exception.getMessage());
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgumentException(
+            IllegalArgumentException exception,
+            HttpServletRequest request
+    ) {
+        log.warn("Argumento ou parâmetro inválido na requisição [{}]: {}", request.getRequestURI(), exception.getMessage());
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
+    }
+
+    @ExceptionHandler(org.springframework.data.core.PropertyReferenceException.class)
+    public ResponseEntity<ErrorResponseDTO> handlePropertyReferenceException(
+            org.springframework.data.core.PropertyReferenceException exception,
+            HttpServletRequest request
+    ) {
+        String message = String.format("Propriedade de ordenação ou consulta inválida: '%s'", exception.getPropertyName());
+        log.warn("Propriedade de consulta inexistente [{}]: {}", request.getRequestURI(), exception.getMessage());
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                message,
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
     }
 
     @ExceptionHandler(Exception.class)

@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexo Finance - Protótipo de Perfis (User & Admin)</title>
+  <!-- Google Fonts: Roboto & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-subtle: #eff6ff;
+      --admin-color: #7c3aed;
+      --admin-subtle: #f5f3ff;
+      --success: #10b981;
+      --success-subtle: #ecfdf5;
+      --danger: #ef4444;
+      --danger-subtle: #fef2f2;
+      --warning: #f59e0b;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --bg-page: #f8fafc;
+      --card-bg: #ffffff;
+      --sidebar-width: 260px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', 'Roboto', sans-serif;
+    }
+
+    body {
+      background-color: #0b1120;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* BARRA SUPERIOR DE CONTROLE DO PROTÓTIPO */
+    .prototype-bar {
+      background: #1e293b;
+      color: #f1f5f9;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #334155;
+      z-index: 9999;
+      position: sticky;
+      top: 0;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .prototype-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prototype-title .badge-live {
+      background: #2563eb;
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .toggle-pill {
+      background: #0f172a;
+      padding: 3px;
+      border-radius: 20px;
+      display: flex;
+      gap: 3px;
+      border: 1px solid #334155;
+    }
+
+    .toggle-pill button {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 6px 14px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .toggle-pill button.active {
+      background: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .toggle-pill button.active.admin-toggle {
+      background: #7c3aed;
+    }
+
+    /* WRAPPER PRINCIPAL DO PROTÓTIPO */
+    .prototype-viewport {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      transition: all 0.3s ease;
+      background: #0f172a;
+    }
+
+    /* Container Modo Desktop vs Modo Mobile */
+    .screen-container {
+      background: var(--bg-page);
+      width: 100%;
+      max-width: 1360px;
+      min-height: 850px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Estilos do Modo Mobile Frame */
+    .screen-container.mode-mobile {
+      max-width: 410px;
+      min-height: 840px;
+      height: 840px;
+      border-radius: 40px;
+      border: 12px solid #1e293b;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    .mobile-notch {
+      display: none;
+    }
+
+    .mode-mobile .mobile-notch {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 24px;
+      background: #1e293b;
+      width: 140px;
+      margin: 0 auto;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+    }
+
+    .mode-mobile .mobile-speaker {
+      width: 48px;
+      height: 4px;
+      background: #334155;
+      border-radius: 3px;
+    }
+
+    /* LAYOUT DA APLICAÇÃO (App Layout) */
+    .app-layout {
+      display: flex;
+      flex: 1;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR (Desktop) */
+    .app-sidebar {
+      width: var(--sidebar-width);
+      background: #ffffff;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .mode-mobile .app-sidebar {
+      display: none; /* Em mobile usamos bottom-bar ou drawer */
+    }
+
+    .brand-section {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 17px;
+      color: #0f172a;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-category {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #94a3b8;
+      letter-spacing: 0.8px;
+      padding: 10px 12px 4px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .nav-item a:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .nav-item.active a {
+      background: var(--primary-subtle);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-item.admin-item a {
+      color: var(--admin-color);
+    }
+
+    .nav-item.admin-item.active a {
+      background: var(--admin-subtle);
+      color: var(--admin-color);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .nav-badge.admin-badge {
+      background: #7c3aed;
+      color: #fff;
+    }
+
+    .user-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: #475569;
+      position: relative;
+    }
+
+    .user-avatar.admin-avatar {
+      background: #ede9fe;
+      color: #7c3aed;
+      border: 2px solid #7c3aed;
+    }
+
+    .user-avatar-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+
+    .badge-google {
+      background: #ea4335;
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .user-role-label {
+      font-size: 11px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .admin-pill-tag {
+      background: #ede9fe;
+      color: #7c3aed;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+    }
+
+    /* ÁREA PRINCIPAL DE CONTEÚDO */
+    .app-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background: var(--bg-page);
+    }
+
+    /* HEADER SUPERIOR DO APP */
+    .app-header {
+      background: #ffffff;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .mode-mobile .app-header {
+      padding: 30px 16px 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #475569;
+    }
+
+    .mode-mobile .mobile-menu-btn {
+      display: block;
+    }
+
+    .page-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .role-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .role-indicator.user-mode {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .role-indicator.admin-mode {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+
+    /* CORPO DO CONTEÚDO */
+    .content-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .mode-mobile .content-body {
+      padding: 16px;
+      gap: 16px;
+      padding-bottom: 90px; /* espaço para bottom-bar */
+    }
+
+    /* CARDS DE KPI / MÉTRICAS */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .mode-mobile .metrics-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      padding: 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .icon-blue { background: #dbeafe; color: #1d4ed8; }
+    .icon-purple { background: #ede9fe; color: #7c3aed; }
+    .icon-green { background: #dcfce7; color: #15803d; }
+    .icon-red { background: #fee2e2; color: #b91c1c; }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .text-green { color: #16a34a; font-weight: 600; }
+    .text-red { color: #dc2626; font-weight: 600; }
+
+    /* TABELA DE GESTÃO DE USUÁRIOS (ADMIN) */
+    .admin-card-container {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .table-toolbar {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 8px;
+      width: 280px;
+    }
+
+    .mode-mobile .search-box {
+      width: 100%;
+    }
+
+    .search-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 13px;
+      width: 100%;
+      color: #0f172a;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .pill-btn {
+      border: 1px solid var(--border-color);
+      background: #fff;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #475569;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .pill-btn.active {
+      background: #0f172a;
+      color: #fff;
+      border-color: #0f172a;
+    }
+
+    /* DESKTOP TABLE */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .users-table th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .users-table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
+      color: #334155;
+      vertical-align: middle;
+    }
+
+    .users-table tr:hover {
+      background: #f8fafc;
+    }
+
+    .user-col-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .table-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-status.active {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .badge-status.inactive {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .badge-role {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-role.admin {
+      background: #ede9fe;
+      color: #7c3aed;
+      border: 1px solid #ddd6fe;
+    }
+
+    .badge-role.user {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    .provider-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #475569;
+    }
+
+    .action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action-icon {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-action-icon:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .btn-action-icon.danger:hover {
+      background: #fee2e2;
+      color: #dc2626;
+      border-color: #fca5a5;
+    }
+
+    /* CARDS MOBILE PARA USUÁRIOS (Em vez de tabela larga) */
+    .mobile-users-list {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .mode-mobile .table-responsive {
+      display: none;
+    }
+
+    .mode-mobile .mobile-users-list {
+      display: flex;
+    }
+
+    .user-mobile-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    .user-mobile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-mobile-actions {
+      display: flex;
+      gap: 8px;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn-mobile-action {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+    }
+
+    /* VISÃO DO USUÁRIO PADRÃO (ROLE_USER) */
+    .user-profile-view {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .user-welcome-banner {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #ffffff;
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-mobile .user-welcome-banner {
+      padding: 18px;
+    }
+
+    .welcome-text h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .welcome-text p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .banner-graphic {
+      font-size: 72px;
+      opacity: 0.15;
+      position: absolute;
+      right: 20px;
+      bottom: -10px;
+    }
+
+    .transactions-card {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .transaction-item:last-child {
+      border-bottom: none;
+    }
+
+    .tx-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tx-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* MOBILE BOTTOM NAVIGATION BAR */
+    .mobile-bottom-bar {
+      display: none;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid var(--border-color);
+      padding: 8px 12px 14px;
+      justify-content: space-around;
+      z-index: 50;
+    }
+
+    .mode-mobile .mobile-bottom-bar {
+      display: flex;
+    }
+
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #64748b;
+      font-size: 10px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .bottom-nav-item.active {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .bottom-nav-item.admin-nav.active {
+      color: var(--admin-color);
+    }
+
+    /* MODAL DE SIMULAÇÃO */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-modal {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: #fff;
+    }
+
+    .btn-modal.primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+    }
+
+    .btn-modal.danger {
+      background: var(--danger);
+      color: #fff;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA DE CONTROLE DO PROTÓTIPO (Alternador em tempo real) -->
+  <header class="prototype-bar">
+    <div class="prototype-title">
+      <span class="badge-live">Protótipo Interativo</span>
+      <span>Nexo Finance: Controle de Perfis (RBAC)</span>
+    </div>
+
+    <div class="controls-group">
+      <!-- Alternador de Dispositivo -->
+      <div class="control-item">
+        <span>Dispositivo:</span>
+        <div class="toggle-pill">
+          <button id="btnDeviceDesktop" class="active" onclick="setDevice('desktop')">
+            <span class="material-symbols-outlined" style="font-size: 16px;">desktop_windows</span>
+            Desktop
+          </button>
+          <button id="btnDeviceMobile" onclick="setDevice('mobile')">
+            <span class="material-symbols-outlined" style="font-size: 16px;">smartphone</span>
+            Mobile
+          </button>
+        </div>
+      </div>
+
+      <!-- Alternador de Perfil -->
+      <div class="control-item">
+        <span>Perfil Ativo:</span>
+        <div class="toggle-pill">
+          <button id="btnRoleUser" onclick="setRole('USER')">
+            <span class="material-symbols-outlined" style="font-size: 16px;">person</span>
+            ROLE_USER (Comum)
+          </button>
+          <button id="btnRoleAdmin" class="active admin-toggle" onclick="setRole('ADMIN')">
+            <span class="material-symbols-outlined" style="font-size: 16px;">shield_person</span>
+            ROLE_ADMIN (Gestor)
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- VIEWPORT -->
+  <div class="prototype-viewport">
+    <div id="screenContainer" class="screen-container">
+      
+      <!-- Detalhe da carcaça do celular no modo Mobile -->
+      <div class="mobile-notch">
+        <div class="mobile-speaker"></div>
+      </div>
+
+      <!-- APLICAÇÃO INTERNA -->
+      <div class="app-layout">
+        
+        <!-- SIDEBAR (DESKTOP) -->
+        <aside class="app-sidebar">
+          <div class="brand-section">
+            <div class="brand-icon">
+              <span class="material-symbols-outlined">account_balance_wallet</span>
+            </div>
+            <span class="brand-title">Nexo Finance</span>
+          </div>
+
+          <ul class="nav-list">
+            <li class="nav-category">Principal</li>
+            <li class="nav-item user-only-item active">
+              <a href="javascript:void(0)" onclick="setActiveNav('dashboard')">
+                <span class="material-symbols-outlined">dashboard</span>
+                Dashboard Pessoal
+              </a>
+            </li>
+            <li class="nav-item user-only-item">
+              <a href="javascript:void(0)">
+                <span class="material-symbols-outlined">payments</span>
+                Minhas Contas
+              </a>
+            </li>
+            <li class="nav-item user-only-item">
+              <a href="javascript:void(0)">
+                <span class="material-symbols-outlined">receipt_long</span>
+                Transações
+              </a>
+            </li>
+            <li class="nav-item user-only-item">
+              <a href="javascript:void(0)">
+                <span class="material-symbols-outlined">category</span>
+                Categorias
+              </a>
+            </li>
+
+            <!-- MENU EXCLUSIVO DE ADMIN -->
+            <li class="nav-category admin-only-section">Administração</li>
+            <li class="nav-item admin-item admin-only-section active">
+              <a href="javascript:void(0)" onclick="setActiveNav('admin-users')">
+                <span class="material-symbols-outlined">manage_accounts</span>
+                Gestão de Usuários
+                <span class="nav-badge admin-badge">Admin</span>
+              </a>
+            </li>
+            <li class="nav-item admin-item admin-only-section">
+              <a href="javascript:void(0)">
+                <span class="material-symbols-outlined">monitoring</span>
+                Métricas Globais
+              </a>
+            </li>
+            <li class="nav-item admin-item admin-only-section">
+              <a href="javascript:void(0)">
+                <span class="material-symbols-outlined">security</span>
+                Logs & Auditoria
+              </a>
+            </li>
+          </ul>
+
+          <!-- FOOTER DO USUÁRIO NA SIDEBAR -->
+          <div class="user-footer">
+            <div id="sidebarUserAvatar" class="user-avatar admin-avatar">
+              <span id="sidebarAvatarText">IT</span>
+              <div class="user-avatar-badge badge-google" title="Conectado via Google"></div>
+            </div>
+            <div class="user-details">
+              <span id="sidebarUserName" class="user-name">Ítalo Pereira</span>
+              <span id="sidebarUserRole" class="user-role-label">
+                <span class="admin-pill-tag">ADMIN</span>
+              </span>
+            </div>
+            <button class="btn-action-icon" title="Sair da conta" style="border:none;">
+              <span class="material-symbols-outlined" style="font-size: 18px; color: #ef4444;">logout</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL (MAIN) -->
+        <main class="app-main">
+          
+          <!-- HEADER SUPERIOR -->
+          <header class="app-header">
+            <div class="header-left">
+              <button class="mobile-menu-btn">
+                <span class="material-symbols-outlined">menu</span>
+              </button>
+              <h1 id="pageHeading" class="page-title">
+                <span class="material-symbols-outlined" style="color: #7c3aed;">manage_accounts</span>
+                Gestão de Usuários & Perfis
+              </h1>
+            </div>
+
+            <div class="header-actions">
+              <div id="roleHeaderBadge" class="role-indicator admin-mode">
+                <span class="material-symbols-outlined" style="font-size: 16px;">verified_user</span>
+                <span>Modo Administrador</span>
+              </div>
+            </div>
+          </header>
+
+          <!-- CONTEÚDO DINÂMICO CONFORME O PERFIL SELECIONADO -->
+          <div class="content-body">
+            
+            <!-- ============================================== -->
+            <!-- 1. TELA DE ADMIN: GESTÃO DE USUÁRIOS E PERFIS -->
+            <!-- ============================================== -->
+            <div id="adminView" class="admin-view-wrapper">
+              
+              <!-- Cards de KPIs do Sistema -->
+              <div class="metrics-grid">
+                <div class="stat-card">
+                  <div class="stat-header">
+                    <span>Total de Usuários</span>
+                    <div class="stat-icon icon-blue">
+                      <span class="material-symbols-outlined">group</span>
+                    </div>
+                  </div>
+                  <div class="stat-value">1.482</div>
+                  <div class="stat-sub">
+                    <span class="text-green">+34 este mês</span> na plataforma
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="stat-header">
+                    <span>Administradores</span>
+                    <div class="stat-icon icon-purple">
+                      <span class="material-symbols-outlined">shield_person</span>
+                    </div>
+                  </div>
+                  <div class="stat-value">3</div>
+                  <div class="stat-sub">Contas com acesso total</div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="stat-header">
+                    <span>Logins via Google</span>
+                    <div class="stat-icon icon-green">
+                      <span class="material-symbols-outlined">account_circle</span>
+                    </div>
+                  </div>
+                  <div class="stat-value">71%</div>
+                  <div class="stat-sub">1.052 usuários via OAuth2</div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="stat-header">
+                    <span>Bloqueados / Inativos</span>
+                    <div class="stat-icon icon-red">
+                      <span class="material-symbols-outlined">block</span>
+                    </div>
+                  </div>
+                  <div class="stat-value" id="countInactive">2</div>
+                  <div class="stat-sub text-red">Acesso impedido</div>
+                </div>
+              </div>
+
+              <!-- Tabela e Gerenciamento -->
+              <div class="admin-card-container" style="margin-top: 20px;">
+                <div class="table-toolbar">
+                  <div class="search-box">
+                    <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 18px;">search</span>
+                    <input type="text" id="userSearchInput" placeholder="Buscar por nome ou e-mail..." oninput="filterUsers()">
+                  </div>
+
+                  <div class="filter-pills">
+                    <button class="pill-btn active" onclick="setFilter('ALL', this)">Todos (4)</button>
+                    <button class="pill-btn" onclick="setFilter('ADMIN', this)">Admins</button>
+                    <button class="pill-btn" onclick="setFilter('USER', this)">Usuários Comuns</button>
+                    <button class="pill-btn" onclick="setFilter('INACTIVE', this)">Inativos</button>
+                  </div>
+                </div>
+
+                <!-- TABELA DESKTOP -->
+                <div class="table-responsive">
+                  <table class="users-table">
+                    <thead>
+                      <tr>
+                        <th>Usuário</th>
+                        <th>Provedor</th>
+                        <th>Perfil (Role)</th>
+                        <th>Status</th>
+                        <th>Cadastro</th>
+                        <th style="text-align: right;">Ações de Controle</th>
+                      </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                      <!-- Linhas geradas via JavaScript -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- CARDS MOBILE DE USUÁRIO -->
+                <div id="mobileUserCards" class="mobile-users-list">
+                  <!-- Cards gerados via JavaScript -->
+                </div>
+              </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- 2. TELA DO USUÁRIO COMUM: DASHBOARD PESSOAL   -->
+            <!-- ============================================== -->
+            <div id="userView" class="user-profile-view" style="display: none;">
+              
+              <!-- Banner de Boas-vindas -->
+              <div class="user-welcome-banner">
+                <div class="welcome-text">
+                  <h2>Olá, Ítalo Pereira! 👋</h2>
+                  <p>Aqui está o resumo financeiro da sua carteira neste mês de Outubro.</p>
+                </div>
+                <span class="material-symbols-outlined banner-graphic">wallet</span>
+              </div>
+
+              <!-- KPIs Pessoais -->
+              <div class="metrics-grid">
+                <div class="stat-card">
+                  <div class="stat-header">
+                    <span>Saldo Total em Contas</span>
+                    <div class="stat-icon icon-blue">
+                      <span class="material-symbols-outlined">account_balance</span>
+                    </div>
+                  </div>
+                  <div class="stat-value">R$ 14.850,20</div>
+                  <div class="stat-sub text-green">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">trending_up</span> +8,5% este mês
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="stat-header">
+                    <span>Receitas Recebidas</span>
+                    <div class="stat-icon icon-green">
+                      <span class="material-symbols-outlined">arrow_downward</span>
+                    </div>
+                  </div>
+                  <div class="stat-value" style="color: #10b981;">R$ 8.200,00</div>
+                  <div class="stat-sub">Salário & Investimentos</div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="stat-header">
+                    <span>Despesas Pagas</span>
+                    <div class="stat-icon icon-red">
+                      <span class="material-symbols-outlined">arrow_upward</span>
+                    </div>
+                  </div>
+                  <div class="stat-value" style="color: #ef4444;">R$ 3.120,50</div>
+                  <div class="stat-sub">38% da renda mensal</div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="stat-header">
+                    <span>Reserva de Emergência</span>
+                    <div class="stat-icon icon-purple">
+                      <span class="material-symbols-outlined">savings</span>
+                    </div>
+                  </div>
+                  <div class="stat-value">R$ 11.729,70</div>
+                  <div class="stat-sub">Meta 85% alcançada</div>
+                </div>
+              </div>
+
+              <!-- Transações Recentes -->
+              <div class="transactions-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3 style="font-size: 15px; font-weight: 700; color: #0f172a;">Últimos Lançamentos</h3>
+                  <a href="javascript:void(0)" style="font-size: 12px; color: var(--primary); font-weight: 600; text-decoration: none;">Ver Extrato</a>
+                </div>
+
+                <div class="transaction-item">
+                  <div class="tx-info">
+                    <div class="tx-icon" style="background: #fef2f2; color: #ef4444;">
+                      <span class="material-symbols-outlined">shopping_cart</span>
+                    </div>
+                    <div>
+                      <div style="font-weight: 600; font-size: 13px;">Supermercado Carrefour</div>
+                      <div style="font-size: 11px; color: #64748b;">Alimentação • Cartão Nubank</div>
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-weight: 700; color: #ef4444; font-size: 14px;">- R$ 342,80</div>
+                    <div style="font-size: 11px; color: #94a3b8;">Hoje, 11:42</div>
+                  </div>
+                </div>
+
+                <div class="transaction-item">
+                  <div class="tx-info">
+                    <div class="tx-icon" style="background: #ecfdf5; color: #10b981;">
+                      <span class="material-symbols-outlined">payments</span>
+                    </div>
+                    <div>
+                      <div style="font-weight: 600; font-size: 13px;">Salário Nexo Tech</div>
+                      <div style="font-size: 11px; color: #64748b;">Receita Fixa • Conta Itaú</div>
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-weight: 700; color: #10b981; font-size: 14px;">+ R$ 6.500,00</div>
+                    <div style="font-size: 11px; color: #94a3b8;">Ontem</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </main>
+      </div>
+
+      <!-- BOTTOM BAR (MOBILE ONLY) -->
+      <nav class="mobile-bottom-bar">
+        <a class="bottom-nav-item active" onclick="setRole('USER')">
+          <span class="material-symbols-outlined">dashboard</span>
+          <span>Home</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="material-symbols-outlined">receipt_long</span>
+          <span>Extrato</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="material-symbols-outlined">add_circle</span>
+          <span>Novo</span>
+        </a>
+        <a id="mobileAdminNavItem" class="bottom-nav-item admin-nav" onclick="setRole('ADMIN')">
+          <span class="material-symbols-outlined">manage_accounts</span>
+          <span>Admin</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="material-symbols-outlined">account_circle</span>
+          <span>Perfil</span>
+        </a>
+      </nav>
+
+      <!-- MODAL DE CONFIRMAÇÃO (Simulação) -->
+      <div id="simModal" class="modal-overlay">
+        <div class="modal-card">
+          <div class="modal-title">
+            <span class="material-symbols-outlined" id="modalIcon" style="color: #7c3aed;">verified</span>
+            <span id="modalHeading">Alterar Perfil</span>
+          </div>
+          <p id="modalDescription" style="font-size: 13px; color: #475569; line-height: 1.5;">
+            Tem certeza que deseja promover este usuário a Administrador? Ele terá acesso irrestrito ao painel.
+          </p>
+          <div class="modal-actions">
+            <button class="btn-modal" onclick="closeModal()">Cancelar</button>
+            <button class="btn-modal primary" id="modalConfirmBtn" onclick="confirmAction()">Confirmar Alteração</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // DADOS MOCKADOS DE USUÁRIOS
+    let users = [
+      {
+        id: 1,
+        name: "Ítalo Pereira (Você)",
+        email: "italo@nexofinance.com",
+        role: "ADMIN",
+        provider: "GOOGLE",
+        active: true,
+        createdAt: "12/10/2026",
+        isCurrent: true
+      },
+      {
+        id: 2,
+        name: "Carlos Eduardo Silva",
+        email: "carlos.edu@gmail.com",
+        role: "USER",
+        provider: "GOOGLE",
+        active: true,
+        createdAt: "18/10/2026",
+        isCurrent: false
+      },
+      {
+        id: 3,
+        name: "Mariana Souza Costa",
+        email: "mariana.costa@hotmail.com",
+        role: "USER",
+        provider: "LOCAL",
+        active: true,
+        createdAt: "22/10/2026",
+        isCurrent: false
+      },
+      {
+        id: 4,
+        name: "Robson Spam Bot",
+        email: "robson_99@fakebox.ru",
+        role: "USER",
+        provider: "LOCAL",
+        active: false,
+        createdAt: "29/10/2026",
+        isCurrent: false
+      }
+    ];
+
+    let currentFilter = 'ALL';
+    let currentRole = 'ADMIN';
+    let pendingAction = null;
+
+    // CONTROLE DE DISPOSITIVO (Desktop vs Mobile)
+    function setDevice(device) {
+      const container = document.getElementById('screenContainer');
+      const btnDesktop = document.getElementById('btnDeviceDesktop');
+      const btnMobile = document.getElementById('btnDeviceMobile');
+
+      if (device === 'mobile') {
+        container.classList.add('mode-mobile');
+        btnMobile.classList.add('active');
+        btnDesktop.classList.remove('active');
+      } else {
+        container.classList.remove('mode-mobile');
+        btnDesktop.classList.add('active');
+        btnMobile.classList.remove('active');
+      }
+    }
+
+    // CONTROLE DE PERFIL (ROLE_USER vs ROLE_ADMIN)
+    function setRole(role) {
+      currentRole = role;
+      const btnUser = document.getElementById('btnRoleUser');
+      const btnAdmin = document.getElementById('btnRoleAdmin');
+      const adminSections = document.querySelectorAll('.admin-only-section');
+      const adminView = document.getElementById('adminView');
+      const userView = document.getElementById('userView');
+      const pageHeading = document.getElementById('pageHeading');
+      const roleHeaderBadge = document.getElementById('roleHeaderBadge');
+      const sidebarUserRole = document.getElementById('sidebarUserRole');
+      const sidebarUserAvatar = document.getElementById('sidebarUserAvatar');
+      const mobileAdminNav = document.getElementById('mobileAdminNavItem');
+
+      if (role === 'ADMIN') {
+        btnAdmin.classList.add('active');
+        btnUser.classList.remove('active');
+
+        // Mostra opções de admin
+        adminSections.forEach(el => el.style.display = '');
+        adminView.style.display = 'block';
+        userView.style.display = 'none';
+
+        pageHeading.innerHTML = `
+          <span class="material-symbols-outlined" style="color: #7c3aed;">manage_accounts</span>
+          Gestão de Usuários & Perfis
+        `;
+
+        roleHeaderBadge.className = 'role-indicator admin-mode';
+        roleHeaderBadge.innerHTML = `
+          <span class="material-symbols-outlined" style="font-size: 16px;">verified_user</span>
+          <span>Modo Administrador</span>
+        `;
+
+        sidebarUserRole.innerHTML = `<span class="admin-pill-tag">ADMIN</span>`;
+        sidebarUserAvatar.className = 'user-avatar admin-avatar';
+        mobileAdminNav.style.display = 'flex';
+      } else {
+        btnUser.classList.add('active');
+        btnAdmin.classList.remove('active');
+
+        // Oculta opções de admin
+        adminSections.forEach(el => el.style.display = 'none');
+        adminView.style.display = 'none';
+        userView.style.display = 'flex';
+
+        pageHeading.innerHTML = `
+          <span class="material-symbols-outlined" style="color: #2563eb;">dashboard</span>
+          Minha Carteira Pessoal
+        `;
+
+        roleHeaderBadge.className = 'role-indicator user-mode';
+        roleHeaderBadge.innerHTML = `
+          <span class="material-symbols-outlined" style="font-size: 16px;">person</span>
+          <span>Perfil Usuário (ROLE_USER)</span>
+        `;
+
+        sidebarUserRole.innerHTML = `Usuário Padrão`;
+        sidebarUserAvatar.className = 'user-avatar';
+        mobileAdminNav.style.display = 'none';
+      }
+    }
+
+    // RENDERIZAR TABELA E CARDS
+    function renderUsers() {
+      const tbody = document.getElementById('userTableBody');
+      const mobileContainer = document.getElementById('mobileUserCards');
+      const searchTerm = document.getElementById('userSearchInput').value.toLowerCase();
+
+      tbody.innerHTML = '';
+      mobileContainer.innerHTML = '';
+
+      const filtered = users.filter(u => {
+        const matchesSearch = u.name.toLowerCase().includes(searchTerm) || u.email.toLowerCase().includes(searchTerm);
+        if (!matchesSearch) return false;
+
+        if (currentFilter === 'ADMIN') return u.role === 'ADMIN';
+        if (currentFilter === 'USER') return u.role === 'USER';
+        if (currentFilter === 'INACTIVE') return !u.active;
+        return true;
+      });
+
+      filtered.forEach(u => {
+        const initials = u.name.split(' ').map(n => n[0]).slice(0, 2).join('');
+        const providerIcon = u.provider === 'GOOGLE'
+          ? `<span class="provider-tag"><span class="material-symbols-outlined" style="color:#ea4335; font-size:16px;">account_circle</span> Google</span>`
+          : `<span class="provider-tag"><span class="material-symbols-outlined" style="color:#64748b; font-size:16px;">key</span> E-mail</span>`;
+
+        const statusBadge = u.active
+          ? `<span class="badge-status active"><span class="material-symbols-outlined" style="font-size:12px;">check_circle</span> Ativo</span>`
+          : `<span class="badge-status inactive"><span class="material-symbols-outlined" style="font-size:12px;">cancel</span> Bloqueado</span>`;
+
+        const roleBadge = u.role === 'ADMIN'
+          ? `<span class="badge-role admin"><span class="material-symbols-outlined" style="font-size:13px;">shield</span> ADMIN</span>`
+          : `<span class="badge-role user">USER</span>`;
+
+        // Linha Desktop
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="user-col-info">
+              <div class="table-avatar ${u.role === 'ADMIN' ? 'admin-avatar' : ''}">${initials}</div>
+              <div>
+                <div style="font-weight: 600; color: #0f172a;">${u.name}</div>
+                <div style="font-size: 11px; color: #64748b;">${u.email}</div>
+              </div>
+            </div>
+          </td>
+          <td>${providerIcon}</td>
+          <td>${roleBadge}</td>
+          <td>${statusBadge}</td>
+          <td style="color: #64748b;">${u.createdAt}</td>
+          <td>
+            <div class="action-buttons" style="justify-content: flex-end;">
+              ${!u.isCurrent ? `
+                <button class="btn-action-icon" title="${u.role === 'ADMIN' ? 'Rebaixar para Usuário' : 'Promover para Admin'}" onclick="toggleUserRole(${u.id})">
+                  <span class="material-symbols-outlined" style="font-size: 16px; color: #7c3aed;">
+                    ${u.role === 'ADMIN' ? 'person_remove' : 'verified_user'}
+                  </span>
+                </button>
+                <button class="btn-action-icon ${u.active ? 'danger' : ''}" title="${u.active ? 'Bloquear Acesso' : 'Desbloquear Acesso'}" onclick="toggleUserStatus(${u.id})">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">
+                    ${u.active ? 'lock' : 'lock_open'}
+                  </span>
+                </button>
+                <button class="btn-action-icon" title="Impersonate (Acessar como este usuário)" onclick="impersonateUser('${u.name}')">
+                  <span class="material-symbols-outlined" style="font-size: 16px; color: #2563eb;">visibility</span>
+                </button>
+              ` : `
+                <span style="font-size: 11px; color: #94a3b8; font-style: italic;">Você mesmo</span>
+              `}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        // Card Mobile
+        const mCard = document.createElement('div');
+        mCard.className = 'user-mobile-card';
+        mCard.innerHTML = `
+          <div class="user-mobile-header">
+            <div class="user-col-info">
+              <div class="table-avatar ${u.role === 'ADMIN' ? 'admin-avatar' : ''}">${initials}</div>
+              <div>
+                <div style="font-weight: 600; font-size: 13px;">${u.name}</div>
+                <div style="font-size: 11px; color: #64748b;">${u.email}</div>
+              </div>
+            </div>
+            ${statusBadge}
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-top: 4px;">
+            <div>Perfil: ${roleBadge}</div>
+            <div>${providerIcon}</div>
+          </div>
+          ${!u.isCurrent ? `
+            <div class="user-mobile-actions">
+              <button class="btn-mobile-action" onclick="toggleUserRole(${u.id})">
+                <span class="material-symbols-outlined" style="font-size: 14px; color: #7c3aed;">swap_horiz</span>
+                ${u.role === 'ADMIN' ? 'Rebaixar' : 'Promover'}
+              </button>
+              <button class="btn-mobile-action" onclick="toggleUserStatus(${u.id})">
+                <span class="material-symbols-outlined" style="font-size: 14px; color: ${u.active ? '#ef4444' : '#10b981'};">
+                  ${u.active ? 'lock' : 'lock_open'}
+                </span>
+                ${u.active ? 'Bloquear' : 'Ativar'}
+              </button>
+              <button class="btn-mobile-action" onclick="impersonateUser('${u.name}')">
+                <span class="material-symbols-outlined" style="font-size: 14px; color: #2563eb;">visibility</span>
+                Acessar
+              </button>
+            </div>
+          ` : `
+            <div style="text-align: right; font-size: 11px; color: #94a3b8; font-style: italic;">Sua própria conta (Admin)</div>
+          `}
+        `;
+        mobileContainer.appendChild(mCard);
+      });
+    }
+
+    function setFilter(filter, el) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-pills .pill-btn').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+      renderUsers();
+    }
+
+    function filterUsers() {
+      renderUsers();
+    }
+
+    // AÇÕES SIMULADAS
+    function toggleUserRole(id) {
+      const user = users.find(u => u.id === id);
+      if (!user) return;
+      const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
+
+      openModal(
+        'Alterar Perfil de Acesso',
+        `Deseja alterar o perfil de <strong>${user.name}</strong> para <strong>${newRole}</strong>?`,
+        'swap_horiz',
+        () => {
+          user.role = newRole;
+          renderUsers();
+        }
+      );
+    }
+
+    function toggleUserStatus(id) {
+      const user = users.find(u => u.id === id);
+      if (!user) return;
+      const newStatus = !user.active;
+
+      openModal(
+        newStatus ? 'Desbloquear Usuário' : 'Bloquear Usuário',
+        newStatus
+          ? `O usuário <strong>${user.name}</strong> poderá logar novamente no sistema.`
+          : `O usuário <strong>${user.name}</strong> será impedido imediatamente de fazer login no Nexo Finance.`,
+        newStatus ? 'lock_open' : 'lock',
+        () => {
+          user.active = newStatus;
+          renderUsers();
+        }
+      );
+    }
+
+    function impersonateUser(name) {
+      openModal(
+        'Acessar como Usuário (Modo Suporte)',
+        `Você entrará em modo de visualização segura como <strong>${name}</strong> para auxiliá-lo com suas finanças. Nenhuma alteração irreversível será feita sem autorização.`,
+        'visibility',
+        () => {
+          setRole('USER');
+          document.getElementById('sidebarUserName').innerText = name;
+          document.getElementById('sidebarAvatarText').innerText = name.split(' ').map(n=>n[0]).slice(0,2).join('');
+        }
+      );
+    }
+
+    function openModal(title, text, icon, onConfirm) {
+      document.getElementById('modalHeading').innerText = title;
+      document.getElementById('modalDescription').innerHTML = text;
+      document.getElementById('modalIcon').innerText = icon;
+      document.getElementById('simModal').style.display = 'flex';
+      pendingAction = onConfirm;
+    }
+
+    function closeModal() {
+      document.getElementById('simModal').style.display = 'none';
+      pendingAction = null;
+    }
+
+    function confirmAction() {
+      if (pendingAction) pendingAction();
+      closeModal();
+    }
+
+    // Inicialização
+    renderUsers();
+  </script>
+</body>
+</html>
