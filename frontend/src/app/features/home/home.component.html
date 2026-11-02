@@ -11,9 +11,16 @@
     <span class="toolbar-spacer"></span>
 
     <div class="user-actions">
+      @if (authService.isAdmin()) {
+        <button mat-flat-button color="primary" class="admin-panel-btn" (click)="goToAdmin()">
+          <mat-icon>admin_panel_settings</mat-icon>
+          <span>Painel Admin</span>
+        </button>
+      }
+
       <mat-chip class="auth-chip" highlighted>
         <mat-icon matChipAvatar>verified_user</mat-icon>
-        Sessão Autenticada
+        {{ authService.isAdmin() ? 'Administrador' : 'Sessão Autenticada' }}
       </mat-chip>
 
       <button mat-stroked-button color="warn" (click)="onLogout()" class="logout-button">

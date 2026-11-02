@@ -23,11 +23,15 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './home.component.scss'
 })
 export class HomeComponent {
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
   readonly tokenPreview = this.authService.token();
+
+  goToAdmin(): void {
+    this.router.navigate(['/admin']);
+  }
 
   onLogout(): void {
     this.authService.logout();

@@ -1,5 +1,6 @@
 package com.nexofinance.backend.common.exception;
 
+import com.nexofinance.backend.domain.admin.exception.SelfModificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -114,6 +115,54 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().status()).isEqualTo(403);
         assertThat(response.getBody().error()).isEqualTo("Forbidden");
         assertThat(response.getBody().message()).contains("você não possui permissão");
+        assertThat(response.getBody().path()).isEqualTo("/api/v1/test");
+    }
+
+    @Test
+    @DisplayName("Deve tratar SelfModificationException retornando 400 Bad Request")
+    void shouldHandleSelfModificationException() {
+        SelfModificationException ex = new SelfModificationException("Administradores não podem alterar o próprio perfil");
+
+        ResponseEntity<ErrorResponseDTO> response = exceptionHandler.handleSelfModificationException(ex, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().status()).isEqualTo(400);
+        assertThat(response.getBody().error()).isEqualTo("Bad Request");
+        assertThat(response.getBody().message()).contains("não podem alterar o próprio perfil");
+        assertThat(response.getBody().path()).isEqualTo("/api/v1/test");
+    }
+
+    @Test
+    @DisplayName("Deve tratar IllegalArgumentException retornando 400 Bad Request")
+    void shouldHandleIllegalArgumentException() {
+        IllegalArgumentException ex = new IllegalArgumentException("Campo de ordenação não permitido: 'passwordHash'");
+
+        ResponseEntity<ErrorResponseDTO> response = exceptionHandler.handleIllegalArgumentException(ex, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().status()).isEqualTo(400);
+        assertThat(response.getBody().error()).isEqualTo("Bad Request");
+        assertThat(response.getBody().message()).contains("passwordHash");
+        assertThat(response.getBody().path()).isEqualTo("/api/v1/test");
+    }
+
+    @Test
+    @DisplayName("Deve tratar PropertyReferenceException retornando 400 Bad Request")
+    void shouldHandlePropertyReferenceException() {
+        org.springframework.data.core.PropertyReferenceException ex =
+                new org.springframework.data.core.PropertyReferenceException("invalidField",
+                        org.springframework.data.core.TypeInformation.of(com.nexofinance.backend.domain.user.User.class),
+                        java.util.List.of());
+
+        ResponseEntity<ErrorResponseDTO> response = exceptionHandler.handlePropertyReferenceException(ex, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().status()).isEqualTo(400);
+        assertThat(response.getBody().error()).isEqualTo("Bad Request");
+        assertThat(response.getBody().message()).contains("invalidField");
         assertThat(response.getBody().path()).isEqualTo("/api/v1/test");
     }
 

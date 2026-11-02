@@ -52,6 +52,18 @@
     align-items: center;
     gap: 1rem;
 
+    .admin-panel-btn {
+      background-color: #00a859;
+      color: #ffffff;
+      border-radius: 10px;
+      font-weight: 600;
+      height: 38px;
+
+      &:hover {
+        background-color: #006b3c;
+      }
+    }
+
     .auth-chip {
       background-color: #ecfdf5;
       color: #047857;
