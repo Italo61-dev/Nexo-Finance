@@ -1,118 +1,340 @@
-.auth-page-container {
-  min-height: 100vh;
+/* ==========================================================================
+   LAYOUT SPLIT-SCREEN AUTHENTICATION — NEXO FINANCE
+   ========================================================================== */
+
+.auth-split-wrapper {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--nexo-background);
+  font-family: var(--nexo-font-family);
+}
+
+/* Botão de Alternância de Tema Flutuante no Canto Superior Esquerdo */
+.login-theme-toggle {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 50;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--nexo-border);
+  background-color: var(--nexo-surface);
+  color: var(--nexo-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem 1rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  box-sizing: border-box;
-}
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
 
-.auth-card {
-  width: 100%;
-  max-width: 440px;
-  margin: auto;
-  border-radius: 24px;
-  background: #ffffff;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
-  padding: 2rem 1.5rem 1.5rem;
-  box-sizing: border-box;
+  &:hover {
+    transform: scale(1.08);
+    background-color: var(--nexo-surface-hover);
+    border-color: var(--nexo-primary);
+    color: var(--nexo-primary);
+  }
 
-  @media (max-width: 600px) {
-    padding: 1.5rem 1.25rem 1.25rem;
-    border-radius: 20px;
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }
 
-.auth-header {
-  text-align: center;
-  margin-bottom: 2rem;
+/* ==========================================================================
+   COLUNA ESQUERDA: Livro 3D / Página Virando (Login <-> Cadastro / Esqueci)
+   ========================================================================== */
 
-  .logo-wrapper {
+.auth-form-column {
+  flex: 1;
+  max-width: 580px;
+  min-width: 440px;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 3.5rem;
+  background-color: var(--nexo-surface);
+  border-right: 1px solid var(--nexo-border);
+  box-sizing: border-box;
+
+  @media (max-width: 1023px) {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+    border-right: none;
+    padding: 2.5rem 1.5rem;
+    background-color: var(--nexo-background);
+  }
+}
+
+/* Cenário 3D com Perspectiva */
+.auth-3d-scene {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  perspective: 1800px;
+  perspective-origin: center center;
+}
+
+/* Container Flipper com CSS Grid compartilhado para auto-altura perfeita */
+.auth-flipper-3d {
+  width: 100%;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.35, 1);
+
+  &.is-flipped {
+    transform: rotateY(180deg);
+  }
+}
+
+/* Faces do Cartão 3D */
+.auth-card-face {
+  grid-area: 1 / 1 / 2 / 2;
+  width: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-sizing: border-box;
+}
+
+.auth-card-front {
+  transform: rotateY(0deg);
+  z-index: 2;
+}
+
+.auth-card-back {
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+
+.auth-form-inner {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabeçalho do Formulário com Logo */
+.auth-header {
+  margin-bottom: 1.75rem;
+
+  .brand-logo-lockup {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    background: #eff6ff;
-    color: #2563eb;
-    margin-bottom: 0.75rem;
+    gap: 0.75rem;
+    text-decoration: none;
+    cursor: pointer;
+    margin-bottom: 1.25rem;
+    transition: transform var(--nexo-transition-fast);
 
-    .logo-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    .brand-symbol {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+
+      .brand-name-nexo {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--nexo-text-primary);
+      }
+
+      .brand-name-finance {
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: var(--nexo-primary);
+        letter-spacing: -0.01em;
+      }
     }
   }
 
-  .brand-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 0.5rem 0;
-    letter-spacing: -0.025em;
+  .welcome-heading {
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--nexo-text-primary);
+    margin: 0 0 0.4rem 0;
   }
 
-  .brand-subtitle {
+  .welcome-subheading {
     font-size: 0.95rem;
-    color: #64748b;
+    color: var(--nexo-text-secondary);
+    line-height: 1.45;
     margin: 0;
   }
 }
 
+/* Formulário de Autenticação */
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 0.4rem;
 
   .form-field {
     width: 100%;
 
+    // Tokens oficiais MDC Outline (sem risco de listra sobre o notch)
+    --mdc-outlined-text-field-outline-color: var(--nexo-border);
+    --mdc-outlined-text-field-focus-outline-color: var(--nexo-primary);
+    --mdc-outlined-text-field-hover-outline-color: var(--nexo-text-muted);
+    --mdc-outlined-text-field-container-shape: 12px;
+
+    ::ng-deep {
+      .mat-mdc-text-field-wrapper {
+        border-radius: 12px;
+      }
+
+      .mat-mdc-form-field-focus-overlay {
+        background-color: transparent;
+      }
+
+      // Elimina qualquer listra vertical ou corte horizontal no notch e bordas
+      .mdc-notched-outline__notch {
+        border-left: none !important;
+        border-right: none !important;
+      }
+
+      .mdc-notched-outline__leading {
+        border-right: none !important;
+      }
+
+      .mdc-notched-outline__trailing {
+        border-left: none !important;
+      }
+
+      .mdc-notched-outline--notched .mdc-notched-outline__notch {
+        border-top: none !important;
+      }
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__trailing {
+        border-color: var(--nexo-border);
+      }
+    }
+
     mat-icon {
-      color: #94a3b8;
+      color: var(--nexo-text-muted);
+    }
+  }
+
+  /* Checklist Dinâmico de Segurança da Senha ("Vai digitando e verificando") */
+  .password-checklist {
+    background-color: var(--nexo-surface-secondary);
+    border: 1px solid var(--nexo-border);
+    border-radius: 12px;
+    padding: 0.55rem 0.85rem;
+    margin: 0.15rem 0 0.45rem 0;
+    transition: all 0.25s ease;
+
+    .checklist-title {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--nexo-text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .checklist-items {
+      list-style: none !important;
+      list-style-type: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+
+      li {
+        list-style: none !important;
+        list-style-type: none !important;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.78rem;
+        color: var(--nexo-text-muted);
+        transition: color 0.2s ease, font-weight 0.2s ease;
+
+        &::marker {
+          display: none !important;
+          content: '' !important;
+        }
+
+        mat-icon {
+          font-size: 15px;
+          width: 15px;
+          height: 15px;
+          color: var(--nexo-text-muted);
+          transition: color 0.2s ease;
+        }
+
+        &.valid {
+          color: var(--nexo-text-primary);
+          font-weight: 600;
+
+          mat-icon {
+            color: var(--nexo-neon);
+          }
+        }
+      }
     }
   }
 
   .form-extra-actions {
     display: flex;
     justify-content: flex-end;
-    margin-top: -0.5rem;
+    margin-top: -0.4rem;
     margin-bottom: 0.25rem;
   }
 
   .submit-button {
     height: 48px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     border-radius: 12px;
-    background-color: #2563eb;
+    background-color: var(--nexo-primary);
     color: #ffffff;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
-
-    ::ng-deep .mdc-button__label {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.625rem;
-      width: 100%;
-    }
-
-    mat-icon {
-      font-size: 22px;
-      width: 22px;
-      height: 22px;
-    }
+    box-shadow: 0 4px 14px var(--nexo-primary-glow);
+    transition: all 0.2s ease;
+    margin-top: 0.25rem;
 
     &:hover:not(:disabled) {
-      background-color: #1d4ed8;
+      background-color: var(--nexo-primary-hover);
+      box-shadow: 0 6px 20px rgba(0, 168, 89, 0.4);
     }
 
     &:disabled {
-      background-color: #94a3b8;
-      color: #f1f5f9;
+      background-color: var(--nexo-surface-secondary);
+      border: 1px solid var(--nexo-border);
+      color: var(--nexo-text-muted);
       cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-content-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
     }
 
     .button-spinner {
@@ -128,30 +350,119 @@
     .divider-line {
       flex: 1;
       height: 1px;
-      background-color: #e2e8f0;
+      background-color: var(--nexo-border);
     }
 
     .divider-text {
       padding: 0 0.75rem;
-      font-size: 0.85rem;
-      color: #94a3b8;
+      font-size: 0.8rem;
+      color: var(--nexo-text-muted);
       text-transform: uppercase;
-      font-weight: 500;
+      font-weight: 600;
     }
   }
 
-  .google-button-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  /* Botão Google Customizado sem fundo branco */
+  .custom-google-button-wrapper {
+    position: relative;
     width: 100%;
-    min-height: 44px;
+    height: 46px;
+    border-radius: 12px;
+    overflow: hidden;
 
-    .google-btn-inner {
-      display: flex;
-      justify-content: center;
+    .custom-google-btn {
       width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      background-color: var(--nexo-surface-secondary);
+      border: 1px solid var(--nexo-border);
+      color: var(--nexo-text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+
+      .google-svg-icon {
+        flex-shrink: 0;
+      }
+
+      .google-btn-text {
+        letter-spacing: -0.01em;
+      }
+    }
+
+    &:hover .custom-google-btn {
+      background-color: var(--nexo-surface-hover);
+      border-color: var(--nexo-text-muted);
+    }
+
+    .google-gsi-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.001;
+      cursor: pointer;
+      z-index: 5;
       overflow: hidden;
+    }
+  }
+}
+
+/* Sucesso do Esqueci Senha */
+.forgot-success-box {
+  text-align: center;
+  padding: 1rem 0;
+
+  .success-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(0, 168, 89, 0.15);
+    color: var(--nexo-neon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem auto;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--nexo-text-primary);
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: var(--nexo-text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1.75rem;
+  }
+
+  .submit-button {
+    width: 100%;
+    height: 48px;
+    font-weight: 700;
+    border-radius: 12px;
+    background-color: var(--nexo-primary);
+    color: #ffffff;
+
+    .btn-content-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
   }
 }
@@ -160,28 +471,1209 @@
   text-align: center;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--nexo-border);
 
   p {
     margin: 0;
     font-size: 0.9rem;
-    color: #64748b;
+    color: var(--nexo-text-secondary);
   }
 }
 
 .text-link {
-  color: #2563eb;
-  text-decoration: none;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  font-family: inherit;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--nexo-neon);
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-block;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   transition: color 0.2s ease;
 
   &:hover {
-    color: #1d4ed8;
+    color: #6effb9;
     text-decoration: underline;
   }
 
   &.highlight {
-    font-weight: 600;
+    font-weight: 700;
   }
 }
+
+.auth-inline-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.auth-switch-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--nexo-primary);
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    color: var(--nexo-primary-hover);
+    text-decoration: underline;
+  }
+}
+
+/* ==========================================================================
+   ESTILOS COMPARTILHADOS: BOTÃO GOOGLE OFICIAL (DESKTOP E MOBILE)
+   ========================================================================== */
+
+.custom-google-button-wrapper {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  overflow: hidden;
+
+  .custom-google-btn {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    background-color: var(--nexo-surface-secondary);
+    border: 1px solid var(--nexo-border);
+    color: var(--nexo-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    .google-svg-icon {
+      flex-shrink: 0;
+    }
+
+    .google-btn-text {
+      letter-spacing: -0.01em;
+    }
+  }
+
+  &:hover .custom-google-btn,
+  &:active .custom-google-btn {
+    background-color: var(--nexo-surface-hover);
+    border-color: var(--nexo-text-muted);
+  }
+
+  .google-gsi-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.001;
+    cursor: pointer;
+    z-index: 5;
+    overflow: hidden;
+  }
+}
+
+/* ==========================================================================
+   ESTILOS COMPARTILHADOS: CARTÃO FINTECH 3D (DESKTOP E MOBILE)
+   ========================================================================== */
+
+.fintech-card {
+  border-radius: 20px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #FFFFFF;
+  font-family: var(--nexo-font-family);
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+
+  .card-glass-specular {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+
+    .card-brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .card-brand-title {
+        font-weight: 800;
+        font-size: 1.15rem;
+        letter-spacing: -0.03em;
+        color: #FFFFFF;
+      }
+    }
+
+    .contactless-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: var(--nexo-neon);
+    }
+  }
+
+  .card-chip-box {
+    width: 38px;
+    height: 28px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #CCA762, #FFE4A0);
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 2;
+
+    &.gold {
+      background: linear-gradient(135deg, #E6C280, #FFF1C5);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  .card-bottom-row {
+    position: relative;
+    z-index: 2;
+
+    .card-number-line {
+      font-family: monospace;
+      font-size: 15px;
+      letter-spacing: 2.5px;
+      margin-bottom: 0.4rem;
+      color: #FFFFFF;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    }
+
+    .card-holder-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+
+      .meta-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.65);
+        letter-spacing: 0.05em;
+        display: block !important;
+        margin-bottom: 2px;
+      }
+
+      .meta-name {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #FFFFFF;
+        display: block !important;
+      }
+
+      .card-tier {
+        font-size: 15px;
+        font-weight: 800;
+        text-transform: lowercase;
+        letter-spacing: -0.02em;
+
+        &.titanium {
+          color: #A0B2AA;
+        }
+
+        &.platinum {
+          color: var(--nexo-neon);
+        }
+      }
+    }
+  }
+
+  &.card-titanium {
+    background: linear-gradient(135deg, #182420 0%, #0B1210 65%, #00361E 100%);
+    border: 1px solid rgba(0, 168, 89, 0.35);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+  }
+
+  &.card-platinum {
+    background: linear-gradient(135deg, #00A859 0%, #006B3C 55%, #0B1210 100%);
+    border: 1px solid rgba(27, 240, 137, 0.5);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.8), 0 0 28px rgba(0, 168, 89, 0.3);
+  }
+}
+
+/* ==========================================================================
+   COLUNA DIREITA: FIXA - Hero Showcase com Cartões 3D Nexo Finance
+   ========================================================================== */
+
+.desktop-only {
+  @media (max-width: 1023px) {
+    display: none !important;
+  }
+}
+
+.auth-hero-column {
+  flex: 1.3;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 4rem;
+  background: radial-gradient(circle at 75% 25%, #004D2A 0%, #071710 45%, #050A08 100%);
+  box-sizing: border-box;
+
+  .hero-backdrop-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(27, 240, 137, 0.16) 0%, transparent 70%);
+    filter: blur(80px);
+    pointer-events: none;
+    top: 10%;
+    right: 5%;
+  }
+
+  .hero-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0, 168, 89, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 168, 89, 0.04) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+  }
+
+  .hero-inner-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 520px;
+    text-align: center;
+  }
+
+  .hero-badge-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--nexo-radius-full);
+    background: rgba(0, 168, 89, 0.15);
+    border: 1px solid rgba(27, 240, 137, 0.3);
+    color: var(--nexo-neon);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--nexo-neon);
+      box-shadow: 0 0 8px var(--nexo-neon);
+    }
+  }
+
+  /* Cartões Flutuantes em Perspectiva 3D */
+  .showcase-cards-wrapper {
+    position: relative;
+    width: 440px;
+    height: 330px;
+    margin: 1.5rem 0 2.5rem 0;
+    perspective: 1200px;
+
+    .fintech-card {
+      position: absolute;
+      width: 350px;
+      height: 215px;
+    }
+
+    .card-titanium {
+      top: 5px;
+      left: 10px;
+      z-index: 1;
+      transform: rotate(-8deg) translateY(10px);
+
+      &:hover {
+        transform: rotate(-5deg) translateY(-2px) scale(1.02);
+        z-index: 3;
+      }
+    }
+
+    .card-platinum {
+      bottom: 10px;
+      right: 10px;
+      z-index: 2;
+      transform: rotate(11deg) translateY(-8px);
+
+      &:hover {
+        transform: rotate(8deg) translateY(-18px) scale(1.03);
+      }
+    }
+  }
+
+  .hero-caption-box {
+    .hero-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: #FFFFFF;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.35;
+    }
+
+    .hero-description {
+      font-size: 0.95rem;
+      color: #A0B2AA;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+}
+
+/* Modo Escuro */
+:host-context([data-theme="dark"]),
+:host-context(body.dark-theme) {
+  .text-link {
+    color: var(--nexo-neon);
+    &:hover {
+      color: #6effb9;
+    }
+  }
+}
+
+/* ==========================================================================
+   LAYOUT MOBILE C6 BANK STYLE — NEXO FINANCE (< 1024px)
+   ========================================================================== */
+
+.desktop-auth-layout {
+  @media (max-width: 1023px) {
+    display: none !important;
+  }
+}
+
+.mobile-c6-layout {
+  display: none;
+
+  @media (max-width: 1023px) {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100dvh;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 15%, #082216 0%, #060F0A 55%, #030705 100%);
+    font-family: var(--nexo-font-family);
+    box-sizing: border-box;
+  }
+}
+
+/* Fundo Ambiental com Glow Esmeralda e Malha */
+.mobile-ambient-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+
+  .ambient-glow-circle {
+    position: absolute;
+    top: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 168, 89, 0.32) 0%, rgba(27, 240, 137, 0.12) 45%, transparent 70%);
+    filter: blur(55px);
+    animation: ambientPulse 5s ease-in-out infinite alternate;
+  }
+
+  .ambient-mesh-grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.2;
+    background-image:
+      linear-gradient(rgba(0, 168, 89, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 168, 89, 0.08) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(circle at 50% 25%, black 20%, transparent 65%);
+    -webkit-mask-image: radial-gradient(circle at 50% 25%, black 20%, transparent 65%);
+  }
+}
+
+/* Barra Superior Mobile com Logo e Tema */
+.mobile-header-bar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.25rem 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+
+  .mobile-brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+
+    .brand-text {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+      line-height: 1;
+
+      .brand-name-nexo {
+        color: #FFFFFF;
+      }
+
+      .brand-name-finance {
+        color: var(--nexo-neon);
+        font-weight: 500;
+        font-size: 1.15rem;
+      }
+    }
+  }
+
+  .mobile-theme-toggle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:active {
+      transform: scale(0.92);
+      background: rgba(0, 168, 89, 0.2);
+      border-color: var(--nexo-neon);
+      color: var(--nexo-neon);
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+/* Palco Central do Hero: Monograma 3D "N" Escultural da Marca */
+.mobile-hero-stage {
+  position: relative;
+  z-index: 5;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.25rem 1.25rem;
+  perspective: 1200px;
+
+  .mobile-emblem-3d-wrapper {
+    position: relative;
+    width: 215px;
+    height: 215px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1200px;
+    margin-bottom: 0.95rem;
+
+    .emblem-orbital-glow {
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 230, 122, 0.36) 0%, rgba(0, 168, 89, 0.16) 45%, transparent 70%);
+      filter: blur(28px);
+      pointer-events: none;
+      animation: emblemPulse 4s ease-in-out infinite alternate;
+    }
+
+    .emblem-floor-reflection {
+      position: absolute;
+      bottom: -18px;
+      width: 170px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(0, 230, 122, 0.45) 0%, transparent 70%);
+      filter: blur(10px);
+      pointer-events: none;
+      animation: floorShadowPulse 5s ease-in-out infinite alternate;
+    }
+
+    .emblem-3d-sculpture {
+      position: relative;
+      width: 195px;
+      height: 195px;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      transform: rotateX(12deg) rotateY(-14deg) rotateZ(3deg);
+      animation: emblemFloat3D 5s ease-in-out infinite alternate;
+      filter: drop-shadow(0 20px 36px rgba(0, 0, 0, 0.8));
+      will-change: transform;
+      -webkit-font-smoothing: antialiased;
+
+      .emblem-layer {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+
+        .emblem-svg {
+          width: 100%;
+          height: 100%;
+          overflow: visible;
+          shape-rendering: geometricPrecision;
+          text-rendering: geometricPrecision;
+        }
+
+        &.depth-back {
+          transform: translateZ(-22px) translateY(11px) scale(0.97);
+          opacity: 0.85;
+        }
+
+        &.depth-mid {
+          transform: translateZ(-11px) translateY(5.5px) scale(0.985);
+          opacity: 0.95;
+        }
+
+        &.depth-front {
+          transform: translateZ(11px);
+          position: relative;
+          overflow: hidden;
+          border-radius: 28px;
+
+          .emblem-sweep-shine {
+            position: absolute;
+            top: -50%;
+            left: -80%;
+            width: 50%;
+            height: 200%;
+            background: linear-gradient(
+              90deg,
+              transparent,
+              rgba(255, 255, 255, 0.15),
+              rgba(255, 255, 255, 0.45),
+              rgba(255, 255, 255, 0.15),
+              transparent
+            );
+            transform: rotate(25deg);
+            pointer-events: none;
+            animation: emblemShineSweep 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+          }
+        }
+      }
+    }
+  }
+
+  .mobile-hero-tagline {
+    text-align: center;
+    max-width: 290px;
+
+    .tagline-headline {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.72);
+      letter-spacing: -0.01em;
+      line-height: 1.4;
+    }
+  }
+}
+
+/* Backdrop Escuro para Quando a Gaveta Expande */
+.mobile-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+
+  &.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Bottom Sheet / Gaveta Inferior Deslizante */
+.mobile-bottom-drawer {
+  position: relative;
+  z-index: 50;
+  width: 100%;
+  background: rgba(14, 22, 18, 0.96);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -12px 35px rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
+  transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), max-height 0.4s ease;
+  max-height: 52dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  &.is-expanded {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 28px 28px 0 0;
+    box-shadow: 0 -16px 50px rgba(0, 0, 0, 0.95);
+    background: rgba(10, 18, 14, 0.98);
+    display: flex;
+    flex-direction: column;
+
+    // Quando entra em "Acessar Conta" (Login): ocupa APENAS o espaço do formulário!
+    &.mode-login {
+      top: auto;
+      height: auto;
+      max-height: 82dvh;
+    }
+
+    // Modo Esqueci a Senha: ocupa apenas o espaço do formulário curto
+    &.mode-forgot {
+      top: auto;
+      height: auto;
+      max-height: 65dvh;
+    }
+
+    // Modo Cadastro: ocupa APENAS o tamanho do formulário (sem forçar 100vh)
+    &.mode-register {
+      top: auto;
+      height: auto;
+      max-height: 88dvh;
+    }
+  }
+
+  .drawer-drag-zone {
+    width: 100%;
+    padding: 0.75rem 0 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    .drawer-drag-pill {
+      width: 42px;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.22);
+      transition: background 0.2s ease;
+    }
+
+    &:hover .drawer-drag-pill {
+      background: var(--nexo-neon);
+    }
+  }
+}
+
+/* Fase 1: Estado Inicial / Landing da Gaveta (Estilo C6 Bank) */
+.drawer-landing-content {
+  padding: 0.25rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+
+  .drawer-greeting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+
+    .greeting-user-box {
+      .greeting-sub {
+        font-size: 0.8rem;
+        color: #7A8F85;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        display: block;
+      }
+
+      .greeting-user-flex {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        .greeting-name {
+          font-size: 1.35rem;
+          font-weight: 800;
+          color: #FFFFFF;
+          margin: 0;
+          letter-spacing: -0.02em;
+        }
+
+        .greeting-chevron {
+          color: #A0B2AA;
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    .greeting-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(0, 168, 89, 0.12);
+      border: 1px solid rgba(0, 168, 89, 0.3);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--nexo-neon);
+
+      .pulse-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: var(--nexo-neon);
+        box-shadow: 0 0 8px var(--nexo-neon);
+      }
+    }
+  }
+
+  /* Faixa de Destaques em 3 Colunas com Divisores (Estilo C6: Pix | Cartão | Boleto) */
+  .drawer-features-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+
+    .strip-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 1;
+
+      mat-icon {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+        color: var(--nexo-neon);
+      }
+
+      span {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #A0B2AA;
+        text-align: center;
+      }
+    }
+
+    .strip-divider {
+      width: 1px;
+      height: 26px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  /* Pilha de Botões de Ação */
+  .drawer-actions-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .mobile-action-primary {
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #00C468 0%, #00A859 100%);
+      color: #021C0E;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 4px 18px rgba(0, 168, 89, 0.35);
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:active {
+        transform: scale(0.98);
+        box-shadow: 0 2px 10px rgba(0, 168, 89, 0.2);
+      }
+    }
+
+    .mobile-action-secondary {
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 168, 89, 0.35);
+      color: var(--nexo-neon);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:active {
+        transform: scale(0.98);
+        background: rgba(0, 168, 89, 0.1);
+      }
+    }
+
+    .mobile-or-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0.2rem 0;
+
+      .or-line {
+        flex: 1;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .or-text {
+        font-size: 0.75rem;
+        color: #7A8F85;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+
+    .mobile-google-slot {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      min-height: 44px;
+
+      .google-mobile-btn-host {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+/* Painel de Formulário Expandido (Login / Cadastro / Esqueci Senha) */
+.drawer-form-panel {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 0;
+  max-height: 100%;
+
+  .drawer-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+    .drawer-nav-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:active {
+        transform: scale(0.92);
+      }
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .drawer-form-heading {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  .drawer-scrollable-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.65rem 1.25rem 1.25rem;
+    overscroll-behavior: contain;
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .form-field {
+      margin-bottom: 0.2rem;
+      width: 100%;
+
+      .mdc-notched-outline__notch {
+        border-left: none !important;
+        border-right: none !important;
+      }
+      .mdc-notched-outline__leading {
+        border-right: none !important;
+      }
+      .mdc-notched-outline__trailing {
+        border-left: none !important;
+      }
+    }
+
+    /* Checklist de Senha no Mobile: Sem marcadores nativos e compacto */
+    .password-checklist {
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 0.45rem 0.75rem;
+      margin: 0.15rem 0 0.35rem 0;
+
+      .checklist-title {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #A0B2AA;
+        margin-bottom: 0.25rem;
+      }
+
+      .checklist-items {
+        list-style: none !important;
+        list-style-type: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+
+        li {
+          list-style: none !important;
+          list-style-type: none !important;
+          display: flex;
+          align-items: center;
+          gap: 0.45rem;
+          font-size: 0.75rem;
+          color: #7A8F85;
+          transition: all 0.2s ease;
+
+          &::marker {
+            display: none !important;
+            content: '' !important;
+          }
+
+          mat-icon {
+            font-size: 15px;
+            width: 15px;
+            height: 15px;
+            color: #7A8F85;
+            transition: color 0.2s ease;
+          }
+
+          &.valid {
+            color: #FFFFFF;
+            font-weight: 600;
+
+            mat-icon {
+              color: var(--nexo-neon);
+            }
+          }
+        }
+      }
+    }
+
+    .submit-button {
+      height: 48px;
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+
+      &:disabled {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: rgba(255, 255, 255, 0.35) !important;
+        box-shadow: none !important;
+      }
+    }
+
+    .drawer-lead-desc {
+      font-size: 0.88rem;
+      color: #A0B2AA;
+      margin: 0 0 0.75rem 0;
+      line-height: 1.4;
+    }
+
+    .drawer-extra-links {
+      display: flex;
+      justify-content: flex-end;
+      margin: 0.15rem 0 0.5rem;
+    }
+
+    .mobile-or-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0.75rem 0 0.5rem;
+
+      .or-line {
+        flex: 1;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .or-text {
+        font-size: 0.75rem;
+        color: #7A8F85;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+
+    .drawer-footer-switch {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      margin-bottom: 0.25rem;
+      font-size: 0.85rem;
+      color: #A0B2AA;
+    }
+  }
+}
+
+/* Animações Flutuantes e Pulsação */
+@keyframes mobileCardFloat {
+  0% {
+    transform: rotateX(8deg) rotateY(-8deg) rotateZ(2deg) translateY(0);
+  }
+  100% {
+    transform: rotateX(6deg) rotateY(-12deg) rotateZ(4deg) translateY(-8px);
+  }
+}
+
+@keyframes ambientPulse {
+  0% {
+    opacity: 0.25;
+    transform: translateX(-50%) scale(0.95);
+  }
+  100% {
+    opacity: 0.45;
+    transform: translateX(-50%) scale(1.08);
+  }
+}
+
+@keyframes emblemFloat3D {
+  0% {
+    transform: rotateX(14deg) rotateY(-16deg) rotateZ(3deg) translateY(0);
+  }
+  100% {
+    transform: rotateX(10deg) rotateY(-8deg) rotateZ(1deg) translateY(-8px);
+  }
+}
+
+@keyframes emblemPulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0.95;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes floorShadowPulse {
+  0% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(0.88);
+  }
+}
+
+@keyframes emblemShineSweep {
+  0% {
+    left: -80%;
+  }
+  30% {
+    left: 140%;
+  }
+  100% {
+    left: 140%;
+  }
+}
+

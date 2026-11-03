@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -16,6 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AdminUserSummary, PlatformMetrics, Role } from '../../core/models/auth.models';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 type FilterTab = 'ALL' | 'ADMINS' | 'USERS' | 'INACTIVE';
 
@@ -31,6 +33,7 @@ type FilterTab = 'ALL' | 'ADMINS' | 'USERS' | 'INACTIVE';
     MatCardModule,
     MatChipsModule,
     MatSnackBarModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -45,6 +48,7 @@ export class AdminComponent implements OnInit {
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
 
   // Estados reativos
   readonly users = signal<AdminUserSummary[]>([]);
@@ -139,24 +143,38 @@ export class AdminComponent implements OnInit {
     }
 
     const newRole: Role = user.role === 'ROLE_ADMIN' ? 'ROLE_USER' : 'ROLE_ADMIN';
-    const actionLabel = newRole === 'ROLE_ADMIN' ? 'promover a Administrador' : 'rebaixar a Usuário';
+    const isPromoting = newRole === 'ROLE_ADMIN';
 
-    if (!confirm(`Deseja realmente ${actionLabel} o usuário "${user.name}"?`)) {
-      return;
-    }
-
-    this.processingUserId.set(user.id);
-    this.adminService.updateUserRole(user.id, newRole).subscribe({
-      next: updatedUser => {
-        this.users.update(currentList => currentList.map(existingUser => existingUser.id === updatedUser.id ? updatedUser : existingUser));
-        this.processingUserId.set(null);
-        this.showSuccess(`Perfil de "${updatedUser.name}" atualizado para ${updatedUser.role === 'ROLE_ADMIN' ? 'Administrador' : 'Usuário'}.`);
-        this.loadMetrics();
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: isPromoting ? 'Promover para Administrador' : 'Rebaixar para Usuário',
+        message: isPromoting
+          ? `Tem certeza de que deseja conceder acesso administrativo para "${user.name}"? O usuário terá permissões completas sobre o sistema.`
+          : `Tem certeza de que deseja rebaixar "${user.name}" para o cargo de Usuário comum?`,
+        confirmText: isPromoting ? 'Promover' : 'Rebaixar',
+        cancelText: 'Cancelar',
+        variant: isPromoting ? 'primary' : 'warning',
+        icon: isPromoting ? 'security' : 'person'
       },
-      error: errorResponse => {
-        this.processingUserId.set(null);
-        this.showError(errorResponse?.error?.message || 'Falha ao atualizar cargo do usuário.');
-      }
+      width: '440px'
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+
+      this.processingUserId.set(user.id);
+      this.adminService.updateUserRole(user.id, newRole).subscribe({
+        next: updatedUser => {
+          this.users.update(currentList => currentList.map(existingUser => existingUser.id === updatedUser.id ? updatedUser : existingUser));
+          this.processingUserId.set(null);
+          this.showSuccess(`Perfil de "${updatedUser.name}" atualizado para ${updatedUser.role === 'ROLE_ADMIN' ? 'Administrador' : 'Usuário'}.`);
+          this.loadMetrics();
+        },
+        error: errorResponse => {
+          this.processingUserId.set(null);
+          this.showError(errorResponse?.error?.message || 'Falha ao atualizar cargo do usuário.');
+        }
+      });
     });
   }
 
@@ -167,24 +185,38 @@ export class AdminComponent implements OnInit {
     }
 
     const newStatus = !user.active;
-    const actionLabel = newStatus ? 'reativar' : 'bloquear';
+    const isActivating = newStatus;
 
-    if (!confirm(`Deseja realmente ${actionLabel} o acesso de "${user.name}"?`)) {
-      return;
-    }
-
-    this.processingUserId.set(user.id);
-    this.adminService.updateUserStatus(user.id, newStatus).subscribe({
-      next: updatedUser => {
-        this.users.update(currentList => currentList.map(existingUser => existingUser.id === updatedUser.id ? updatedUser : existingUser));
-        this.processingUserId.set(null);
-        this.showSuccess(`Usuário "${updatedUser.name}" ${updatedUser.active ? 'reativado' : 'bloqueado'} com sucesso.`);
-        this.loadMetrics();
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: isActivating ? 'Reativar Conta' : 'Bloquear Acesso',
+        message: isActivating
+          ? `Tem certeza de que deseja reativar o acesso de "${user.name}"? O usuário poderá acessar a plataforma normalmente.`
+          : `Tem certeza de que deseja bloquear o acesso de "${user.name}"? O acesso será revogado preventivamente.`,
+        confirmText: isActivating ? 'Ativar Conta' : 'Bloquear Acesso',
+        cancelText: 'Cancelar',
+        variant: isActivating ? 'primary' : 'danger',
+        icon: isActivating ? 'check_circle' : 'block'
       },
-      error: errorResponse => {
-        this.processingUserId.set(null);
-        this.showError(errorResponse?.error?.message || 'Falha ao atualizar status do usuário.');
-      }
+      width: '440px'
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+
+      this.processingUserId.set(user.id);
+      this.adminService.updateUserStatus(user.id, newStatus).subscribe({
+        next: updatedUser => {
+          this.users.update(currentList => currentList.map(existingUser => existingUser.id === updatedUser.id ? updatedUser : existingUser));
+          this.processingUserId.set(null);
+          this.showSuccess(`Usuário "${updatedUser.name}" ${updatedUser.active ? 'reativado' : 'bloqueado'} com sucesso.`);
+          this.loadMetrics();
+        },
+        error: errorResponse => {
+          this.processingUserId.set(null);
+          this.showError(errorResponse?.error?.message || 'Falha ao atualizar status do usuário.');
+        }
+      });
     });
   }
 

@@ -25,3 +25,13 @@ frontend/dist/
 
 # Local scripts
 *.bat
+
+# Agents & regras locais de IA
+.agents/
+
+# Protótipos e rascunhos de design
+prototipo/
+*prototipo*
+brand/
+frontend/public/brand/
+

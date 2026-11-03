@@ -4,8 +4,10 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem 1rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background-color: var(--nexo-background);
+  color: var(--nexo-text-primary);
   box-sizing: border-box;
+  transition: background-color var(--nexo-transition-normal);
 }
 
 .auth-card {
@@ -13,10 +15,11 @@
   max-width: 440px;
   margin: auto;
   border-radius: 24px;
-  background: #ffffff;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
-  padding: 2rem 1.5rem 1.5rem;
+  background-color: var(--nexo-surface) !important;
+  color: var(--nexo-text-primary) !important;
+  box-shadow: var(--nexo-card-shadow);
+  border: 1px solid var(--nexo-border) !important;
+  padding: 2.25rem 1.75rem 1.75rem;
   box-sizing: border-box;
 
   @media (max-width: 600px) {
@@ -36,9 +39,10 @@
     width: 56px;
     height: 56px;
     border-radius: 16px;
-    background: #eff6ff;
-    color: #2563eb;
+    background: var(--nexo-primary-light);
+    color: var(--nexo-primary);
     margin-bottom: 0.75rem;
+    box-shadow: 0 4px 12px var(--nexo-primary-glow);
 
     .logo-icon {
       font-size: 32px;
@@ -49,15 +53,15 @@
 
   .brand-title {
     font-size: 1.75rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 800;
+    color: var(--nexo-text-primary);
     margin: 0 0 0.5rem 0;
     letter-spacing: -0.025em;
   }
 
   .brand-subtitle {
     font-size: 0.95rem;
-    color: #64748b;
+    color: var(--nexo-text-secondary);
     margin: 0;
   }
 }
@@ -71,19 +75,19 @@
     width: 100%;
 
     mat-icon {
-      color: #94a3b8;
+      color: var(--nexo-text-muted);
     }
   }
 
   .submit-button {
     height: 48px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     border-radius: 12px;
-    background-color: #2563eb;
+    background-color: var(--nexo-primary);
     color: #ffffff;
-    transition: background-color 0.2s ease;
-    margin-top: 0.5rem;
+    box-shadow: 0 4px 14px var(--nexo-primary-glow);
+    transition: all 0.2s ease;
 
     ::ng-deep .mdc-button__label {
       display: inline-flex;
@@ -100,13 +104,15 @@
     }
 
     &:hover:not(:disabled) {
-      background-color: #1d4ed8;
+      background-color: var(--nexo-primary-hover);
+      box-shadow: 0 6px 20px rgba(0, 168, 89, 0.4);
     }
 
     &:disabled {
-      background-color: #94a3b8;
-      color: #f1f5f9;
+      background-color: var(--nexo-border);
+      color: var(--nexo-text-muted);
       cursor: not-allowed;
+      box-shadow: none;
     }
 
     .button-spinner {
@@ -119,28 +125,42 @@
   text-align: center;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--nexo-border);
 
   p {
     margin: 0;
     font-size: 0.9rem;
-    color: #64748b;
+    color: var(--nexo-text-secondary);
   }
 }
 
 .text-link {
-  color: #2563eb;
+  color: var(--nexo-primary);
   text-decoration: none;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: color 0.2s ease;
 
   &:hover {
-    color: #1d4ed8;
+    color: var(--nexo-primary-hover);
     text-decoration: underline;
   }
 
   &.highlight {
-    font-weight: 600;
+    font-weight: 700;
+  }
+}
+
+:host-context([data-theme="dark"]),
+:host-context(body.dark-theme) {
+  .auth-header .logo-wrapper {
+    background: rgba(0, 168, 89, 0.2);
+    color: var(--nexo-neon);
+  }
+  .text-link {
+    color: var(--nexo-neon);
+    &:hover {
+      color: #6effb9;
+    }
   }
 }

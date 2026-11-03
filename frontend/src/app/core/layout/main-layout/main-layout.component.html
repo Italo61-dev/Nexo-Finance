@@ -1,0 +1,172 @@
+<div class="layout-wrapper" [class.sidebar-collapsed]="isSidebarCollapsed()">
+  <!-- Backdrop Mobile -->
+  @if (isMobileMenuOpen()) {
+    <div class="mobile-backdrop" (click)="closeMobileMenu()"></div>
+  }
+
+  <!-- Sidebar Lateral -->
+  <aside class="layout-sidebar" [class.mobile-open]="isMobileMenuOpen()">
+    <div class="sidebar-header">
+      <div class="brand-logo" routerLink="/home">
+        <!-- Ícone Vetorial SVG da Marca Nexo Finance -->
+        <svg class="brand-icon" viewBox="0 0 40 40" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="nexoGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#006B3C" />
+              <stop offset="40%" stop-color="#00A859" />
+              <stop offset="100%" stop-color="#1BF089" />
+            </linearGradient>
+            <linearGradient id="nexoGradDiag" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1BF089" />
+              <stop offset="100%" stop-color="#006B3C" />
+            </linearGradient>
+          </defs>
+          <rect width="40" height="40" rx="10" fill="#0E1613" />
+          <g transform="translate(6, 6) scale(0.28)">
+            <rect x="15" y="15" width="20" height="70" rx="10" fill="url(#nexoGrad)" />
+            <path d="M 22 20 C 27 14 36 14 42 21 L 76 68 C 81 75 75 84 66 82 L 61 80 L 21 28 C 18 24 19 21 22 20 Z" fill="url(#nexoGradDiag)" />
+            <rect x="65" y="15" width="20" height="70" rx="10" fill="url(#nexoGrad)" />
+            <circle cx="75" cy="25" r="6" fill="#FFFFFF" />
+          </g>
+        </svg>
+
+        @if (!isSidebarCollapsed()) {
+          <div class="brand-name">
+            <span class="nexo-title">Nexo</span>
+            <span class="nexo-subtitle">Finance</span>
+          </div>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="collapse-toggle-button desktop-only"
+        (click)="toggleSidebarCollapse()"
+        [matTooltip]="isSidebarCollapsed() ? 'Expandir barra lateral' : 'Recolher barra lateral'"
+      >
+        <mat-icon>{{ isSidebarCollapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Navegação -->
+    <nav class="sidebar-nav">
+      <div class="nav-section-title" [class.visually-hidden]="isSidebarCollapsed()">
+        <span>Menu Principal</span>
+      </div>
+
+      <a
+        routerLink="/home"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item"
+        (click)="closeMobileMenu()"
+      >
+        <mat-icon class="nav-icon">dashboard</mat-icon>
+        @if (!isSidebarCollapsed()) {
+          <span class="nav-label">Início / Resumo</span>
+        }
+      </a>
+
+      <!-- Seção Administrativa Restrita a ROLE_ADMIN -->
+      @if (authService.isAdmin()) {
+        <div class="nav-section-title admin-section" [class.visually-hidden]="isSidebarCollapsed()">
+          <span>Administração</span>
+        </div>
+
+        <a
+          routerLink="/admin"
+          routerLinkActive="active"
+          class="nav-item nav-admin-item"
+          (click)="closeMobileMenu()"
+        >
+          <mat-icon class="nav-icon">admin_panel_settings</mat-icon>
+          @if (!isSidebarCollapsed()) {
+            <span class="nav-label">Painel Admin</span>
+            <nexo-badge variant="primary" size="sm" [isPill]="true">Admin</nexo-badge>
+          }
+        </a>
+      }
+    </nav>
+
+    <!-- Rodapé da Sidebar -->
+    <div class="sidebar-footer">
+      @if (!isSidebarCollapsed()) {
+        <div class="user-summary">
+          <div class="user-avatar">
+            <mat-icon>person</mat-icon>
+          </div>
+          <div class="user-info">
+            <span class="user-email-text" [title]="authService.userEmail()">
+              {{ authService.userEmail() || 'Usuário' }}
+            </span>
+            <span class="user-role-caption">
+              {{ authService.isAdmin() ? 'Administrador' : 'Cliente' }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  </aside>
+
+  <!-- Área Principal com Topbar e Conteúdo -->
+  <div class="layout-main-wrapper">
+    <!-- Topbar Superior -->
+    <header class="layout-topbar">
+      <div class="topbar-left">
+        <button
+          type="button"
+          class="mobile-menu-button mobile-only"
+          (click)="toggleMobileMenu()"
+          aria-label="Abrir menu de navegação"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <div class="topbar-welcome">
+          <span class="topbar-greeting">Olá, bem-vindo de volta!</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Badge de Perfil -->
+        @if (authService.isAdmin()) {
+          <nexo-badge variant="primary" size="md" icon="verified_user" [isPill]="true">
+            Administrador
+          </nexo-badge>
+        } @else {
+          <nexo-badge variant="neutral" size="md" icon="account_circle" [isPill]="true">
+            Conta Pessoal
+          </nexo-badge>
+        }
+
+        <!-- Alternador de Tema (Dark / Light) -->
+        <button
+          type="button"
+          class="theme-toggle-button"
+          (click)="onToggleTheme()"
+          [matTooltip]="themeService.isDarkMode() ? 'Alternar para Modo Claro' : 'Alternar para Modo Escuro'"
+        >
+          <mat-icon class="theme-icon">
+            {{ themeService.isDarkMode() ? 'light_mode' : 'dark_mode' }}
+          </mat-icon>
+        </button>
+
+        <!-- Botão de Logout -->
+        <button
+          type="button"
+          class="logout-button"
+          (click)="onLogout()"
+          matTooltip="Encerrar sessão"
+        >
+          <mat-icon>logout</mat-icon>
+          <span class="desktop-only">Sair</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Conteúdo Dinâmico das Rotas -->
+    <main class="layout-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
