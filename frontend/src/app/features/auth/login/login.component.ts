@@ -47,6 +47,7 @@ export const strongPasswordValidator: ValidatorFn = (control: AbstractControl): 
 };
 
 export type AuthBackFaceMode = 'register' | 'forgot';
+export type MobileSheetState = 'initial' | 'login' | 'register' | 'forgot';
 
 @Component({
   selector: 'app-login',
@@ -75,11 +76,23 @@ export class LoginComponent implements AfterViewInit {
 
   @ViewChild('googleBtnContainer') private readonly googleBtnContainer?: ElementRef<HTMLDivElement>;
 
+  @ViewChild('googleBtnContainerMobile')
+  set setGoogleBtnContainerMobile(el: ElementRef<HTMLDivElement> | undefined) {
+    if (el?.nativeElement) {
+      this.googleBtnContainerMobile = el;
+      setTimeout(() => this.renderGoogleMobileButton(), 60);
+    }
+  }
+  private googleBtnContainerMobile?: ElementRef<HTMLDivElement>;
+
   private readonly GOOGLE_CLIENT_ID = environment.googleClientId;
 
-  // Controle da Animação 3D da Coluna da Esquerda (Página Virando)
+  // Controle da Animação 3D da Coluna da Esquerda no Desktop (Página Virando)
   readonly isFlipped = signal(false);
   readonly backFaceMode = signal<AuthBackFaceMode>('register');
+
+  // Controle do Bottom Sheet no Mobile (Estilo C6 Bank)
+  readonly mobileSheetState = signal<MobileSheetState>('initial');
 
   // Estados reativos de Login (Signals)
   readonly isLoading = signal(false);
@@ -131,20 +144,41 @@ export class LoginComponent implements AfterViewInit {
     email: ['', [Validators.required, Validators.email]]
   });
 
-  // Métodos de Navegação 3D na Coluna Esquerda
+  // Métodos de Navegação 3D na Coluna Esquerda (Desktop)
   openRegister(): void {
     this.backFaceMode.set('register');
     this.isFlipped.set(true);
+    this.mobileSheetState.set('register');
   }
 
   openForgotPassword(): void {
     this.backFaceMode.set('forgot');
     this.forgotSubmitted.set(false);
     this.isFlipped.set(true);
+    this.mobileSheetState.set('forgot');
   }
 
   backToLogin(): void {
     this.isFlipped.set(false);
+    this.mobileSheetState.set('login');
+  }
+
+  // Métodos de Controle do Bottom Sheet (Mobile - Estilo C6 Bank)
+  openMobileLogin(): void {
+    this.mobileSheetState.set('login');
+  }
+
+  openMobileRegister(): void {
+    this.mobileSheetState.set('register');
+  }
+
+  openMobileForgot(): void {
+    this.mobileSheetState.set('forgot');
+    this.forgotSubmitted.set(false);
+  }
+
+  closeMobileSheet(): void {
+    this.mobileSheetState.set('initial');
   }
 
   toggleRegisterPasswordVisibility(): void {
@@ -178,8 +212,9 @@ export class LoginComponent implements AfterViewInit {
           verticalPosition: 'top'
         });
         this.registerForm.reset();
-        // Vira a página 3D de volta para o Login
+        // Vira a página 3D de volta para o Login no Desktop e abre o sheet de login no Mobile
         this.isFlipped.set(false);
+        this.mobileSheetState.set('login');
       },
       error: (err) => {
         this.isRegisterLoading.set(false);
@@ -253,9 +288,10 @@ export class LoginComponent implements AfterViewInit {
         }
       });
 
+      const isDark = this.themeService.isDarkMode();
+
       if (this.googleBtnContainer?.nativeElement) {
         this.googleBtnContainer.nativeElement.innerHTML = '';
-        const isDark = this.themeService.isDarkMode();
         const containerWidth = this.googleBtnContainer.nativeElement.offsetWidth || 380;
         google.accounts.id.renderButton(this.googleBtnContainer.nativeElement, {
           theme: isDark ? 'filled_black' : 'outline',
@@ -267,8 +303,27 @@ export class LoginComponent implements AfterViewInit {
           width: containerWidth
         });
       }
+
+      this.renderGoogleMobileButton();
     } else {
       setTimeout(() => this.initGoogleSignIn(), 250);
+    }
+  }
+
+  private renderGoogleMobileButton(): void {
+    if (typeof google !== 'undefined' && google.accounts?.id && this.googleBtnContainerMobile?.nativeElement) {
+      this.googleBtnContainerMobile.nativeElement.innerHTML = '';
+      const isDark = this.themeService.isDarkMode();
+      const mobileWidth = this.googleBtnContainerMobile.nativeElement.offsetWidth || Math.min(window.innerWidth - 64, 340);
+      google.accounts.id.renderButton(this.googleBtnContainerMobile.nativeElement, {
+        theme: isDark ? 'filled_black' : 'outline',
+        size: 'large',
+        type: 'standard',
+        shape: 'rectangular',
+        text: 'signin_with',
+        logo_alignment: 'left',
+        width: mobileWidth
+      });
     }
   }
 
