@@ -1,0 +1,127 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-create-table-lancamentos
+      author: italo
+      changes:
+        - createTable:
+            tableName: LANCAMENTOS
+            columns:
+              - column:
+                  name: ID
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: USUARIO_ID
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: FK_LANCAMENTO_USUARIO
+                    references: USERS(ID)
+                    deleteCascade: true
+              - column:
+                  name: TIPO
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: DESCRICAO
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: VALOR
+                  type: NUMERIC(15,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: DATA_COMPETENCIA
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: DATA_PAGAMENTO
+                  type: DATE
+              - column:
+                  name: CATEGORIA_ID
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: FK_LANCAMENTO_CATEGORIA
+                    references: CATEGORIAS(ID)
+              - column:
+                  name: SUBCATEGORIA_ID
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: FK_LANCAMENTO_SUBCATEGORIA
+                    references: SUBCATEGORIAS(ID)
+              - column:
+                  name: CONTA_FINANCEIRA_ID
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: FK_LANCAMENTO_CONTA_FINANCEIRA
+                    references: CONTAS_FINANCEIRAS(ID)
+              - column:
+                  name: FORMA_PAGAMENTO
+                  type: VARCHAR(30)
+              - column:
+                  name: STATUS_LANCAMENTO
+                  type: VARCHAR(20)
+                  defaultValue: PENDENTE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: CREATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: UPDATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE LANCAMENTOS
+                ADD CONSTRAINT CK_LANCAMENTO_TIPO CHECK (TIPO IN ('RECEITA', 'DESPESA')),
+                ADD CONSTRAINT CK_LANCAMENTO_DESCRICAO CHECK (LENGTH(TRIM(DESCRICAO)) > 0),
+                ADD CONSTRAINT CK_LANCAMENTO_VALOR CHECK (VALOR > 0),
+                ADD CONSTRAINT CK_LANCAMENTO_FORMA_PAGAMENTO CHECK (FORMA_PAGAMENTO IS NULL OR FORMA_PAGAMENTO IN ('DINHEIRO', 'PIX', 'CARTAO_DEBITO', 'CARTAO_CREDITO', 'BOLETO', 'TRANSFERENCIA', 'OUTROS')),
+                ADD CONSTRAINT CK_LANCAMENTO_STATUS CHECK (STATUS_LANCAMENTO IN ('PENDENTE', 'PAGO', 'CANCELADO'));
+        - createIndex:
+            indexName: IDX_LANCAMENTOS_USUARIO_DATA_COMPETENCIA
+            tableName: LANCAMENTOS
+            columns:
+              - column:
+                  name: USUARIO_ID
+              - column:
+                  name: DATA_COMPETENCIA
+        - createIndex:
+            indexName: IDX_LANCAMENTOS_USUARIO_STATUS
+            tableName: LANCAMENTOS
+            columns:
+              - column:
+                  name: USUARIO_ID
+              - column:
+                  name: STATUS_LANCAMENTO
+        - createIndex:
+            indexName: IDX_LANCAMENTOS_CATEGORIA
+            tableName: LANCAMENTOS
+            columns:
+              - column:
+                  name: CATEGORIA_ID
+        - createIndex:
+            indexName: IDX_LANCAMENTOS_SUBCATEGORIA
+            tableName: LANCAMENTOS
+            columns:
+              - column:
+                  name: SUBCATEGORIA_ID
+        - createIndex:
+            indexName: IDX_LANCAMENTOS_CONTA_FINANCEIRA
+            tableName: LANCAMENTOS
+            columns:
+              - column:
+                  name: CONTA_FINANCEIRA_ID

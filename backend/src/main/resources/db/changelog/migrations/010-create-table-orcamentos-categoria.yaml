@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-table-orcamentos-categoria
+      author: italo
+      changes:
+        - createTable:
+            tableName: ORCAMENTOS_CATEGORIA
+            columns:
+              - column:
+                  name: ID
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: USUARIO_ID
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: FK_ORCAMENTO_USUARIO
+                    references: USERS(ID)
+                    deleteCascade: true
+              - column:
+                  name: CATEGORIA_ID
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: FK_ORCAMENTO_CATEGORIA
+                    references: CATEGORIAS(ID)
+              - column:
+                  name: MES_COMPETENCIA
+                  type: VARCHAR(7)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: VALOR_TETO
+                  type: NUMERIC(15,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: PERCENTUAL_ALERTA
+                  type: NUMERIC(5,2)
+                  remarks: Quando nulo, usa PERFIS_FINANCEIROS.PERCENTUAL_ALERTA_PADRAO.
+              - column:
+                  name: CREATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: UPDATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE ORCAMENTOS_CATEGORIA
+                ADD CONSTRAINT CK_ORCAMENTO_MES CHECK (MES_COMPETENCIA ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+                ADD CONSTRAINT CK_ORCAMENTO_VALOR_TETO CHECK (VALOR_TETO > 0),
+                ADD CONSTRAINT CK_ORCAMENTO_PERCENTUAL CHECK (PERCENTUAL_ALERTA IS NULL OR (PERCENTUAL_ALERTA > 0 AND PERCENTUAL_ALERTA <= 100));
+        - addUniqueConstraint:
+            constraintName: UK_ORCAMENTO_USUARIO_CATEGORIA_MES
+            tableName: ORCAMENTOS_CATEGORIA
+            columnNames: USUARIO_ID, CATEGORIA_ID, MES_COMPETENCIA
+        - createIndex:
+            indexName: IDX_ORCAMENTOS_CATEGORIA
+            tableName: ORCAMENTOS_CATEGORIA
+            columns:
+              - column:
+                  name: CATEGORIA_ID

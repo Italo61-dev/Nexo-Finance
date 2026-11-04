@@ -1,0 +1,89 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-create-table-alertas-categoria
+      author: italo
+      changes:
+        - createTable:
+            tableName: ALERTAS_CATEGORIA
+            columns:
+              - column:
+                  name: ID
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: USUARIO_ID
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: FK_ALERTA_USUARIO
+                    references: USERS(ID)
+                    deleteCascade: true
+              - column:
+                  name: CATEGORIA_ID
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: FK_ALERTA_CATEGORIA
+                    references: CATEGORIAS(ID)
+              - column:
+                  name: MES_COMPETENCIA
+                  type: VARCHAR(7)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: STATUS_ALERTA
+                  type: VARCHAR(20)
+                  defaultValue: NORMAL
+                  constraints:
+                    nullable: false
+              - column:
+                  name: VALOR_GASTO
+                  type: NUMERIC(15,2)
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: PERCENTUAL_ATINGIDO
+                  type: NUMERIC(7,2)
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: NOTIFICADO_EM
+                  type: TIMESTAMP
+              - column:
+                  name: LIDO
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: CREATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: UPDATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE ALERTAS_CATEGORIA
+                ADD CONSTRAINT CK_ALERTA_MES CHECK (MES_COMPETENCIA ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+                ADD CONSTRAINT CK_ALERTA_STATUS CHECK (STATUS_ALERTA IN ('NORMAL', 'ATENCAO', 'EXCEDIDO')),
+                ADD CONSTRAINT CK_ALERTA_VALORES CHECK (VALOR_GASTO >= 0 AND PERCENTUAL_ATINGIDO >= 0);
+        - addUniqueConstraint:
+            constraintName: UK_ALERTA_USUARIO_CATEGORIA_MES
+            tableName: ALERTAS_CATEGORIA
+            columnNames: USUARIO_ID, CATEGORIA_ID, MES_COMPETENCIA
+        - createIndex:
+            indexName: IDX_ALERTAS_CATEGORIA
+            tableName: ALERTAS_CATEGORIA
+            columns:
+              - column:
+                  name: CATEGORIA_ID
