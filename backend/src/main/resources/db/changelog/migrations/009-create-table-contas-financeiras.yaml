@@ -5,16 +5,19 @@ databaseChangeLog:
       changes:
         - createTable:
             tableName: CONTAS_FINANCEIRAS
+            remarks: "Contas financeiras e meios de liquidação do usuário (contas bancárias, carteiras físicas, cartões de crédito e investimentos)."
             columns:
               - column:
                   name: ID
                   type: BIGSERIAL
+                  remarks: "Identificador único da conta financeira (chave primária incremental)."
                   constraints:
                     primaryKey: true
                     nullable: false
               - column:
                   name: USUARIO_ID
                   type: BIGINT
+                  remarks: "Identificador do usuário proprietário da conta."
                   constraints:
                     nullable: false
                     foreignKeyName: FK_CONTA_FINANCEIRA_USUARIO
@@ -23,32 +26,38 @@ databaseChangeLog:
               - column:
                   name: NOME
                   type: VARCHAR(100)
+                  remarks: "Nome ou apelido atribuído pelo usuário à conta (ex: Nubank Principal, Carteira Dinheiro, Itaú Salário)."
                   constraints:
                     nullable: false
               - column:
                   name: INSTITUICAO
                   type: VARCHAR(100)
+                  remarks: "Nome da instituição financeira ou banco correspondente (opcional, ex: Nubank, Itaú, Inter)."
               - column:
                   name: TIPO_CONTA
                   type: VARCHAR(30)
+                  remarks: "Modalidade da conta: CONTA_CORRENTE, POUPANCA, CARTAO_CREDITO, CARTEIRA, INVESTIMENTO ou OUTROS."
                   constraints:
                     nullable: false
               - column:
                   name: ATIVO
                   type: BOOLEAN
                   defaultValueBoolean: true
+                  remarks: "Indicador lógico de ativação da conta (soft delete). True para ativa, false para arquivada/encerrada."
                   constraints:
                     nullable: false
               - column:
                   name: CREATED_AT
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora de criação do registro no sistema."
                   constraints:
                     nullable: false
               - column:
                   name: UPDATED_AT
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora da última atualização do registro no sistema."
                   constraints:
                     nullable: false
         - sql:

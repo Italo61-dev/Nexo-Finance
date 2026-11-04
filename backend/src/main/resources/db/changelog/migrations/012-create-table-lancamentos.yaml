@@ -5,16 +5,19 @@ databaseChangeLog:
       changes:
         - createTable:
             tableName: LANCAMENTOS
+            remarks: "Tabela principal de lançamentos e movimentações financeiras (receitas e despesas), registrando valores, datas de competência/pagamento, categorias e contas envolvidas."
             columns:
               - column:
                   name: ID
                   type: BIGSERIAL
+                  remarks: "Identificador único do lançamento financeiro (chave primária incremental)."
                   constraints:
                     primaryKey: true
                     nullable: false
               - column:
                   name: USUARIO_ID
                   type: BIGINT
+                  remarks: "Identificador do usuário proprietário do lançamento financeiro."
                   constraints:
                     nullable: false
                     foreignKeyName: FK_LANCAMENTO_USUARIO
@@ -23,29 +26,35 @@ databaseChangeLog:
               - column:
                   name: TIPO
                   type: VARCHAR(20)
+                  remarks: "Natureza da movimentação: RECEITA (entrada de recursos) ou DESPESA (saída de recursos)."
                   constraints:
                     nullable: false
               - column:
                   name: DESCRICAO
                   type: VARCHAR(255)
+                  remarks: "Descrição detalhada da movimentação financeira (ex: Supermercado Assaí, Salário Novembro). Obrigatória e não vazia."
                   constraints:
                     nullable: false
               - column:
                   name: VALOR
                   type: NUMERIC(15,2)
+                  remarks: "Montante monetário da transação (valor sempre positivo, sendo o impacto determinado pelo campo TIPO)."
                   constraints:
                     nullable: false
               - column:
                   name: DATA_COMPETENCIA
                   type: DATE
+                  remarks: "Data a que o lançamento pertence contabilmente (competência para relatórios e orçamentos mensais)."
                   constraints:
                     nullable: false
               - column:
                   name: DATA_PAGAMENTO
                   type: DATE
+                  remarks: "Data efetiva de liquidação financeira (saída ou entrada real do dinheiro na conta/carteira). Opcional se pendente."
               - column:
                   name: CATEGORIA_ID
                   type: BIGINT
+                  remarks: "Identificador da categoria obrigatória à qual o lançamento pertence."
                   constraints:
                     nullable: false
                     foreignKeyName: FK_LANCAMENTO_CATEGORIA
@@ -53,34 +62,40 @@ databaseChangeLog:
               - column:
                   name: SUBCATEGORIA_ID
                   type: BIGINT
+                  remarks: "Identificador da subcategoria opcional para detalhamento complementar."
                   constraints:
                     foreignKeyName: FK_LANCAMENTO_SUBCATEGORIA
                     references: SUBCATEGORIAS(ID)
               - column:
                   name: CONTA_FINANCEIRA_ID
                   type: BIGINT
+                  remarks: "Identificador da conta financeira de onde o valor foi debitado ou creditado (opcional)."
                   constraints:
                     foreignKeyName: FK_LANCAMENTO_CONTA_FINANCEIRA
                     references: CONTAS_FINANCEIRAS(ID)
               - column:
                   name: FORMA_PAGAMENTO
                   type: VARCHAR(30)
+                  remarks: "Instrumento de liquidação: DINHEIRO, PIX, CARTAO_DEBITO, CARTAO_CREDITO, BOLETO, TRANSFERENCIA ou OUTROS."
               - column:
                   name: STATUS_LANCAMENTO
                   type: VARCHAR(20)
                   defaultValue: PENDENTE
+                  remarks: "Estado da movimentação: PENDENTE (previsto/a pagar/receber), PAGO (liquidado) ou CANCELADO."
                   constraints:
                     nullable: false
               - column:
                   name: CREATED_AT
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora de criação do registro no sistema."
                   constraints:
                     nullable: false
               - column:
                   name: UPDATED_AT
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora da última atualização do registro no sistema."
                   constraints:
                     nullable: false
         - sql:

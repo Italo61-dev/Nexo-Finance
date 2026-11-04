@@ -5,16 +5,19 @@ databaseChangeLog:
       changes:
         - createTable:
             tableName: ORCAMENTOS_CATEGORIA
+            remarks: "Metas de orçamento e limites de gastos mensais estipulados pelo usuário para categorias específicas em um determinado mês de competência."
             columns:
               - column:
                   name: ID
                   type: BIGSERIAL
+                  remarks: "Identificador único do orçamento da categoria (chave primária incremental)."
                   constraints:
                     primaryKey: true
                     nullable: false
               - column:
                   name: USUARIO_ID
                   type: BIGINT
+                  remarks: "Identificador do usuário proprietário deste orçamento."
                   constraints:
                     nullable: false
                     foreignKeyName: FK_ORCAMENTO_USUARIO
@@ -23,6 +26,7 @@ databaseChangeLog:
               - column:
                   name: CATEGORIA_ID
                   type: BIGINT
+                  remarks: "Identificador da categoria à qual este teto de gastos se aplica."
                   constraints:
                     nullable: false
                     foreignKeyName: FK_ORCAMENTO_CATEGORIA
@@ -30,27 +34,31 @@ databaseChangeLog:
               - column:
                   name: MES_COMPETENCIA
                   type: VARCHAR(7)
+                  remarks: "Mês e ano de vigência do orçamento no formato YYYY-MM (ex: 2026-11)."
                   constraints:
                     nullable: false
               - column:
                   name: VALOR_TETO
                   type: NUMERIC(15,2)
+                  remarks: "Valor financeiro máximo estipulado para gastos nesta categoria no mês de competência (maior que zero)."
                   constraints:
                     nullable: false
               - column:
                   name: PERCENTUAL_ALERTA
                   type: NUMERIC(5,2)
-                  remarks: Quando nulo, usa PERFIS_FINANCEIROS.PERCENTUAL_ALERTA_PADRAO.
+                  remarks: "Percentual de consumo específico para disparar alertas nesta categoria (0 a 100%). Se nulo, adota o percentual padrão do perfil do usuário."
               - column:
                   name: CREATED_AT
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora de criação do registro no sistema."
                   constraints:
                     nullable: false
               - column:
                   name: UPDATED_AT
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora da última atualização do registro no sistema."
                   constraints:
                     nullable: false
         - sql:
