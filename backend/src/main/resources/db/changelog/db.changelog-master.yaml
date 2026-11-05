@@ -23,3 +23,5 @@ databaseChangeLog:
       file: db/changelog/migrations/011-create-table-alertas-categoria.yaml
   - include:
       file: db/changelog/migrations/012-create-table-lancamentos.yaml
+  - include:
+      file: db/changelog/migrations/013-update-check-status-alerta.yaml

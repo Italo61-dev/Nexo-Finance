@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: 013-update-check-status-alerta
+      author: italo
+      comment: "Atualiza a constraint CK_ALERTA_STATUS da tabela ALERTAS_CATEGORIA para incluir o estado LIMITE_ATINGIDO (consumo exatamente igual a 100% do teto)."
+      changes:
+        - sql:
+            comment: "Expande a constraint CHECK para permitir o estado LIMITE_ATINGIDO."
+            sql: >
+              ALTER TABLE ALERTAS_CATEGORIA
+                DROP CONSTRAINT CK_ALERTA_STATUS;
+              ALTER TABLE ALERTAS_CATEGORIA
+                ADD CONSTRAINT CK_ALERTA_STATUS
+                CHECK (STATUS_ALERTA IN ('NORMAL', 'ATENCAO', 'LIMITE_ATINGIDO', 'EXCEDIDO'));
+      rollback:
+        - sql:
+            comment: "Aviso: Converter LIMITE_ATINGIDO para ATENCAO preserva os registros preexistentes antes de restabelecer o CHECK de 3 estados, mas perde a distincao semantica entre esses estados."
+            sql: >
+              UPDATE ALERTAS_CATEGORIA
+                SET STATUS_ALERTA = 'ATENCAO'
+                WHERE STATUS_ALERTA = 'LIMITE_ATINGIDO';
+              ALTER TABLE ALERTAS_CATEGORIA
+                DROP CONSTRAINT CK_ALERTA_STATUS;
+              ALTER TABLE ALERTAS_CATEGORIA
+                ADD CONSTRAINT CK_ALERTA_STATUS
+                CHECK (STATUS_ALERTA IN ('NORMAL', 'ATENCAO', 'EXCEDIDO'));
