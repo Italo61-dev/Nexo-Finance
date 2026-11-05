@@ -1,0 +1,101 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-create-table-alertas-categoria
+      author: italo
+      changes:
+        - createTable:
+            tableName: ALERTAS_CATEGORIA
+            remarks: "Registro e rastreamento do estado de alertas de limites de orçamento por categoria/mês, controlando percentuais atingidos, timestamps de notificação e leitura."
+            columns:
+              - column:
+                  name: ID
+                  type: BIGSERIAL
+                  remarks: "Identificador único do estado de alerta (chave primária incremental)."
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: USUARIO_ID
+                  type: BIGINT
+                  remarks: "Identificador do usuário associado ao alerta."
+                  constraints:
+                    nullable: false
+                    foreignKeyName: FK_ALERTA_USUARIO
+                    references: USERS(ID)
+                    deleteCascade: true
+              - column:
+                  name: CATEGORIA_ID
+                  type: BIGINT
+                  remarks: "Identificador da categoria monitorada."
+                  constraints:
+                    nullable: false
+                    foreignKeyName: FK_ALERTA_CATEGORIA
+                    references: CATEGORIAS(ID)
+              - column:
+                  name: MES_COMPETENCIA
+                  type: VARCHAR(7)
+                  remarks: "Mês e ano de referência do alerta no formato YYYY-MM (ex: 2026-11)."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: STATUS_ALERTA
+                  type: VARCHAR(20)
+                  defaultValue: NORMAL
+                  remarks: "Classificação da situação atual do teto orçamentário: NORMAL (dentro da meta), ATENCAO (próximo ao teto) ou EXCEDIDO (teto ultrapassado)."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: VALOR_GASTO
+                  type: NUMERIC(15,2)
+                  defaultValueNumeric: 0
+                  remarks: "Valor monetário acumulado de gastos realizados na categoria no mês de competência."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: PERCENTUAL_ATINGIDO
+                  type: NUMERIC(7,2)
+                  defaultValueNumeric: 0
+                  remarks: "Percentual consumido em relação ao valor teto definido no orçamento (pode exceder 100%)."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: NOTIFICADO_EM
+                  type: TIMESTAMP
+                  remarks: "Data e hora em que a última notificação de alerta foi enviada ou gerada para o usuário."
+              - column:
+                  name: LIDO
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  remarks: "Indica se o usuário já visualizou ou confirmou a leitura do alerta no sistema."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: CREATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora de criação do registro no sistema."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: UPDATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora da última atualização do registro no sistema."
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE ALERTAS_CATEGORIA
+                ADD CONSTRAINT CK_ALERTA_MES CHECK (MES_COMPETENCIA ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+                ADD CONSTRAINT CK_ALERTA_STATUS CHECK (STATUS_ALERTA IN ('NORMAL', 'ATENCAO', 'EXCEDIDO')),
+                ADD CONSTRAINT CK_ALERTA_VALORES CHECK (VALOR_GASTO >= 0 AND PERCENTUAL_ATINGIDO >= 0);
+        - addUniqueConstraint:
+            constraintName: UK_ALERTA_USUARIO_CATEGORIA_MES
+            tableName: ALERTAS_CATEGORIA
+            columnNames: USUARIO_ID, CATEGORIA_ID, MES_COMPETENCIA
+        - createIndex:
+            indexName: IDX_ALERTAS_CATEGORIA
+            tableName: ALERTAS_CATEGORIA
+            columns:
+              - column:
+                  name: CATEGORIA_ID

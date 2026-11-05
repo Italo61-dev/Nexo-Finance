@@ -1,0 +1,74 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-table-perfis-financeiros
+      author: italo
+      changes:
+        - createTable:
+            tableName: PERFIS_FINANCEIROS
+            remarks: "Perfil financeiro do usuário, reunindo renda mensal, renda extra, percentual padrão de alerta e controle do fluxo de onboarding."
+            columns:
+              - column:
+                  name: ID
+                  type: BIGSERIAL
+                  remarks: "Identificador único do perfil financeiro (chave primária incremental)."
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: USUARIO_ID
+                  type: BIGINT
+                  remarks: "Identificador do usuário proprietário do perfil (vínculo 1:1 com USERS)."
+                  constraints:
+                    nullable: false
+                    foreignKeyName: FK_PERFIL_FINANCEIRO_USUARIO
+                    references: USERS(ID)
+                    deleteCascade: true
+                    unique: true
+              - column:
+                  name: RENDA_MENSAL
+                  type: NUMERIC(15,2)
+                  defaultValueNumeric: 0
+                  remarks: "Renda líquida mensal principal do usuário (salário/pró-labore fixo)."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: RENDA_EXTRA
+                  type: NUMERIC(15,2)
+                  defaultValueNumeric: 0
+                  remarks: "Renda variável média mensal (freelances, rendimentos ou bicos)."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: PERCENTUAL_ALERTA_PADRAO
+                  type: NUMERIC(5,2)
+                  defaultValueNumeric: 80
+                  remarks: "Percentual padrão de consumo do orçamento (0 a 100%) no qual o usuário deseja receber alertas preventivos. Padrão: 80%."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ONBOARDING_CONCLUIDO
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  remarks: "Indica se o usuário já concluiu as etapas iniciais de onboarding financeiro no sistema."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: CREATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora de criação do registro no sistema."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: UPDATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora da última atualização do registro no sistema."
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE PERFIS_FINANCEIROS
+                ADD CONSTRAINT CK_PERFIL_RENDA_MENSAL CHECK (RENDA_MENSAL >= 0),
+                ADD CONSTRAINT CK_PERFIL_RENDA_EXTRA CHECK (RENDA_EXTRA >= 0),
+                ADD CONSTRAINT CK_PERFIL_PERCENTUAL_ALERTA CHECK (PERCENTUAL_ALERTA_PADRAO > 0 AND PERCENTUAL_ALERTA_PADRAO <= 100);

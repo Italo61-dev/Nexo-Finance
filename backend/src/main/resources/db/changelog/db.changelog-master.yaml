@@ -7,3 +7,21 @@ databaseChangeLog:
       file: db/changelog/migrations/003-add-oauth2-provider-to-users.yaml
   - include:
       file: db/changelog/migrations/004-add-role-to-users.yaml
+  - include:
+      file: db/changelog/migrations/005-create-table-perfis-financeiros.yaml
+  - include:
+      file: db/changelog/migrations/006-create-table-gastos-fixos.yaml
+  - include:
+      file: db/changelog/migrations/007-create-table-categorias.yaml
+  - include:
+      file: db/changelog/migrations/008-create-table-subcategorias.yaml
+  - include:
+      file: db/changelog/migrations/009-create-table-contas-financeiras.yaml
+  - include:
+      file: db/changelog/migrations/010-create-table-orcamentos-categoria.yaml
+  - include:
+      file: db/changelog/migrations/011-create-table-alertas-categoria.yaml
+  - include:
+      file: db/changelog/migrations/012-create-table-lancamentos.yaml
+  - include:
+      file: db/changelog/migrations/013-update-check-status-alerta.yaml

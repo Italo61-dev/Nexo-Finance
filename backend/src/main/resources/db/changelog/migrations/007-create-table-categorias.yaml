@@ -1,0 +1,77 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-create-table-categorias
+      author: italo
+      comment: USUARIO_ID nulo indica categoria padrão do sistema.
+      changes:
+        - createTable:
+            tableName: CATEGORIAS
+            remarks: "Categorias para classificação de receitas e despesas. USUARIO_ID nulo identifica categorias padrão compartilhadas do sistema; não nulo identifica categorias customizadas do usuário."
+            columns:
+              - column:
+                  name: ID
+                  type: BIGSERIAL
+                  remarks: "Identificador único da categoria (chave primária incremental)."
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: USUARIO_ID
+                  type: BIGINT
+                  remarks: "Identificador do usuário proprietário da categoria. Se NULL, é uma categoria padrão compartilhada do sistema."
+                  constraints:
+                    nullable: true
+                    foreignKeyName: FK_CATEGORIA_USUARIO
+                    references: USERS(ID)
+                    deleteCascade: true
+              - column:
+                  name: NOME
+                  type: VARCHAR(100)
+                  remarks: "Nome de exibição da categoria (ex: Alimentação, Transporte, Salário). Único por usuário e tipo."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: TIPO
+                  type: VARCHAR(20)
+                  remarks: "Classificação da movimentação permitida nesta categoria: RECEITA ou DESPESA."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ATIVO
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  remarks: "Indicador lógico de ativação da categoria (soft delete). True para ativa, false para inativa."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: CREATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora de criação do registro no sistema."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: UPDATED_AT
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "Data e hora da última atualização do registro no sistema."
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE CATEGORIAS
+                ADD CONSTRAINT CK_CATEGORIA_TIPO CHECK (TIPO IN ('RECEITA', 'DESPESA')),
+                ADD CONSTRAINT CK_CATEGORIA_NOME CHECK (LENGTH(TRIM(NOME)) > 0);
+        - sql:
+            comment: Nome único (case-insensitive) por usuário e tipo; e entre as categorias padrão do sistema.
+            sql: >
+              CREATE UNIQUE INDEX UK_CATEGORIA_USUARIO_NOME_TIPO
+                ON CATEGORIAS (USUARIO_ID, LOWER(NOME), TIPO) WHERE USUARIO_ID IS NOT NULL;
+              CREATE UNIQUE INDEX UK_CATEGORIA_SISTEMA_NOME_TIPO
+                ON CATEGORIAS (LOWER(NOME), TIPO) WHERE USUARIO_ID IS NULL;
+        - createIndex:
+            indexName: IDX_CATEGORIAS_USUARIO
+            tableName: CATEGORIAS
+            columns:
+              - column:
+                  name: USUARIO_ID
